@@ -1,0 +1,82 @@
+{
+  "serviceId": "qrisk",
+  "concepts": {
+    "AtrialFibrillation": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "RheumatoidArthritis": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "CKD4_5": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "CKD Stage > 4"
+      }
+    },
+    "Type1Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Type2Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "HypertensiveTreatment": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "Hypertensive Treatment"
+      }
+    },
+    "BMI": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "kg/m2",
+      "min": 0,
+      "max": 99,
+      "required": true
+    },
+    "TotalCholesterol": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "HDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "BP_SBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "SystolicBP",
+      "required": true
+    },
+    "SmokingStatus": {
+      "resourceType": "Observation",
+      "type": "CodeableConcept",
+      "select": "ValueSet/vs-smoking-status",
+      "required": true
+    },
+    "CVD_FMH": {
+      "resourceType": "FamilyMemberHistory",
+      "type": "boolean",
+      "conceptId": "CVD",
+      "label": "Family History of CVD"
+    }
+  }
+}

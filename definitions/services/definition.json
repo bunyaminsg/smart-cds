@@ -1,0 +1,7 @@
+{
+  "hook": "definition",
+  "title": "Concept Definition service",
+  "description": "",
+  "id": "definition",
+  "prefetch": {}
+}

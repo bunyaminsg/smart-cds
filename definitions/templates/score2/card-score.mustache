@@ -1,0 +1,50 @@
+{
+    "uuid": "{{uuid}}",
+    "summary": "Cardiovascular disease 10Y risk SCORE, calculated with SCORE2 algorithm",
+    "indicator": "no-show",
+    "detail": "",
+    "source": {
+        "label": "2018 ESC/ESH Guidelines for the management of arterial hypertension, Chapter None [ pp. None]",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30165516"
+    },
+    "suggestions": [
+    {
+        "label": "Cardiovascular disease 10Y risk SCORE, calculated with SCORE2 algorithm",
+        "actions": [
+        {
+            "type": "create",
+            "description": "",
+            "resource": {
+                "resourceType": "Observation",
+                "status": "final",
+                "code": {
+                    "coding": [
+                    {
+                        "system": "http://loinc.org",
+                        "code": "65861-7",
+                        "display": "Cardiovascular disease 10Y risk SCORE"
+                    }
+                    ]
+                },
+                "valueQuantity": {
+                    "value": "{{scoreValue}}",
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                },
+                "interpretation": [
+                {
+                    "text": "{{card}}"
+                }
+                ],
+                "note": [
+                {
+                    "text": "{{selectedCell}}"
+                }
+            ]
+            }
+        }
+        ]
+    }
+    ]
+}

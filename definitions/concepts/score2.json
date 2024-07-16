@@ -1,0 +1,42 @@
+{
+  "serviceId": "score2",
+  "concepts": {
+    "Region": {
+      "resourceType": "Observation",
+      "type": "CodeableConcept",
+      "select": "ValueSet/vs-score2-region",
+      "required": true
+    },
+    "TotalCholesterol": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "HDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "BP_SBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "SystolicBP",
+      "required": true
+    },
+    "SmokingStatus": {
+      "resourceType": "Observation",
+      "type": "CodeableConcept",
+      "select": "ValueSet/vs-smoking-status",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "serviceId": "smart",
+  "concepts": {
+    "Type1Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Type2Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "CerebrovascularDisease": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "AcuteCoronarySyndrome": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "ChronicCoronarySyndromes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "AorticAneurysm": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "PeripheralArteryDisease": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "TotalCholesterol": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "HDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "BP_SBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "SystolicBP",
+      "required": true
+    },
+    "CRP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "Egfr": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "ml/min/1.73m2",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "SmokingStatus": {
+      "resourceType": "Observation",
+      "type": "CodeableConcept",
+      "select": "ValueSet/vs-smoking-status",
+      "required": true
+    }
+  }
+}

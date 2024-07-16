@@ -1,0 +1,11 @@
+{
+  "id": "calculate",
+  "fields": {
+    "patientId": {
+      "isOptional": false,
+      "prefetchToken": true,
+      "type": "string",
+      "description": "The FHIR Patient.id of the current patient in context"
+    }
+  }
+}

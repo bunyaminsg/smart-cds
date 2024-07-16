@@ -1,0 +1,14 @@
+{
+  "hook": "calculate",
+  "title": "SCORE2 service",
+  "description": "",
+  "id": "score2",
+  "prefetch": {
+    "patient": "Patient/{{context.patientId}}",
+    "SmokingStatus": "Observation?patient=Patient/{{context.patientId}}&code={{config.SmokingStatus}}&_sort=-date&_count=1",
+    "TotalCholesterol": "Observation?patient=Patient/{{context.patientId}}&code={{config.TotalCholesterol}}&_sort=-date&_count=1",
+    "HDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.HDL}}&_sort=-date&_count=1",
+    "BP_SBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_SBP}}&_sort=-date&_count=1",
+    "Region": "Observation?patient=Patient/{{context.patient}}&code={{config.Region}}&_sort=-date&_count=1"
+  }
+}

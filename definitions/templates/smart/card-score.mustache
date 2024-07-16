@@ -1,0 +1,45 @@
+{
+  "uuid": "SMART RISK SCORE",
+  "summary": "SMART Risk Score",
+  "indicator": "no-show",
+  "detail": "",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "SMART Risk Score",
+      "uuid": "Suggestion 1",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://srdc.com.tr",
+                  "code": "smart-risk",
+                  "display": "SMART risk score"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": {{scoreValue}},
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

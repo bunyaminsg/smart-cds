@@ -1,0 +1,11 @@
+{
+  "id": "definition",
+  "fields": {
+    "serviceId": {
+      "isOptional": false,
+      "prefetchToken": true,
+      "type": "string",
+      "description": "Service ID to retrieve definitions"
+    }
+  }
+}

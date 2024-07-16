@@ -1,0 +1,22 @@
+{
+  "hook": "calculate",
+  "title": "SMART score service",
+  "description": "",
+  "id": "smart",
+  "prefetch": {
+    "patient": "Patient/{{context.patientId}}",
+    "Type1Diabetes": "Condition?patient=Patient/{{context.patientId}}&code={{config.Type1Diabetes}}&_count=1",
+    "Type2Diabetes": "Condition?patient=Patient/{{context.patientId}}&code={{config.Type2Diabetes}}&_count=1",
+    "CerebrovascularDisease": "Condition?patient=Patient/{{context.patientId}}&code={{config.CerebrovascularDisease}}&_count=1",
+    "AcuteCoronarySyndrome": "Condition?patient=Patient/{{context.patientId}}&code={{config.AcuteCoronarySyndrome}}&_count=1",
+    "ChronicCoronarySyndromes": "Condition?patient=Patient/{{context.patientId}}&code={{config.ChronicCoronarySyndromes}}&_count=1",
+    "AorticAneurysm": "Condition?patient=Patient/{{context.patientId}}&code={{config.AorticAneurysm}}&_count=1",
+    "PeripheralArteryDisease": "Condition?patient=Patient/{{context.patientId}}&code={{config.PeripheralArteryDisease}}&_count=1",
+    "SmokingStatus": "Observation?patient=Patient/{{context.patientId}}&code={{config.SmokingStatus}}&_sort=-date&_count=1",
+    "BP_SBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_SBP}}&_sort=-date&_count=1",
+    "TotalCholesterol": "Observation?patient=Patient/{{context.patientId}}&code={{config.TotalCholesterol}}&_sort=-date&_count=1",
+    "HDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.HDL}}&_sort=-date&_count=1",
+    "CRP": "Observation?patient=Patient/{{context.patientId}}&code={{config.CRP}}&_sort=-date&_count=1",
+    "Egfr": "Observation?patient=Patient/{{context.patientId}}&code={{config.Egfr}}&_sort=-date&_count=1"
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://kroniq.srdc.com.tr/fhir/ValueSet/smoking-status",
+  "version": "1.0.0",
+  "name": "Smoking Status",
+  "id": "vs-smoking-status",
+  "date": "2023-07-19T11:33:06.965Z",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "LA18976-3",
+            "display": "Current every day smoker",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Current every day smoker"
+              },
+              {
+                "language": "es",
+                "value": "Fumador actual todos los días."
+              },
+              {
+                "language": "de",
+                "value": "Aktueller regelmäßiger Raucher"
+              },
+              {
+                "language": "ro",
+                "value": "Actual fumător în fiecare zi"
+              },
+              {
+                "language": "se",
+                "value": "Aktuell varje dag rökare"
+              },
+              {
+                "language": "hr",
+                "value": "Trenutni svaki dan pušač"
+              },
+              {
+                "language": "it",
+                "value": "Attuale fumatore ogni giorno"
+              },
+              {
+                "language": "tr",
+                "value": "Her gün düzenli içiyor"
+              }
+            ]
+          },
+          {
+            "code": "LA18977-1",
+            "display": "Current some day smoker",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Current some day smoker"
+              },
+              {
+                "language": "es",
+                "value": "Fumador actual algún día."
+              },
+              {
+                "language": "de",
+                "value": "Aktueller Gelegenheitsraucher"
+              },
+              {
+                "language": "ro",
+                "value": "Actual fumător într-o zi"
+              },
+              {
+                "language": "se",
+                "value": "Röker för närvarande någon dag"
+              },
+              {
+                "language": "hr",
+                "value": "Trenutni dnevni pušač"
+              },
+              {
+                "language": "it",
+                "value": "Attuale un po 'di fumatore"
+              },
+              {
+                "language": "tr",
+                "value": "Bazı günler içiyor"
+              }
+            ]
+          },
+          {
+            "code": "8517006",
+            "display": "Former smoker",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Former smoker"
+              },
+              {
+                "language": "es",
+                "value": "Ex fumador"
+              },
+              {
+                "language": "de",
+                "value": "Ehemaliger Raucher"
+              },
+              {
+                "language": "ro",
+                "value": "Fost fumator"
+              },
+              {
+                "language": "se",
+                "value": "Föredetta rökare"
+              },
+              {
+                "language": "hr",
+                "value": "Bivši pušač"
+              },
+              {
+                "language": "it",
+                "value": "Ex fumatore"
+              },
+              {
+                "language": "tr",
+                "value": "Eski içici"
+              }
+            ]
+          },
+          {
+            "code": "LA18978-9",
+            "display": "Never smoker",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Never smoker"
+              },
+              {
+                "language": "es",
+                "value": "Nunca fume"
+              },
+              {
+                "language": "de",
+                "value": "Nichtraucher"
+              },
+              {
+                "language": "ro",
+                "value": "Nu fumați niciodată"
+              },
+              {
+                "language": "se",
+                "value": "Rökar aldrig"
+              },
+              {
+                "language": "hr",
+                "value": "Nikad ne pušiti"
+              },
+              {
+                "language": "it",
+                "value": "Mai fumatore"
+              },
+              {
+                "language": "tr",
+                "value": "Hiç içmemiş"
+              }
+            ]
+          },
+          {
+            "code": "LA18979-7",
+            "display": "Smoker, current status unknown",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Smoker, current status unknown"
+              },
+              {
+                "language": "es",
+                "value": "Fumador, estado actual desconocido"
+              },
+              {
+                "language": "de",
+                "value": "Raucher, aktueller Status unbekannt"
+              },
+              {
+                "language": "ro",
+                "value": "Fumător, starea actuală necunoscută"
+              },
+              {
+                "language": "se",
+                "value": "Rökare, aktuell status okänd"
+              },
+              {
+                "language": "hr",
+                "value": "Pušač, trenutni status nepoznat"
+              },
+              {
+                "language": "it",
+                "value": "Fumatore, stato corrente sconosciuto"
+              },
+              {
+                "language": "tr",
+                "value": "İçici ama mevcut durumu bilinmiyor"
+              }
+            ]
+          },
+          {
+            "code": "LA18980-5",
+            "display": "Unknown if ever smoked",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Unknown if ever smoked"
+              },
+              {
+                "language": "es",
+                "value": "Se desconoce si alguna vez fumó"
+              },
+              {
+                "language": "de",
+                "value": "Unbekannt, ob jemals geraucht"
+              },
+              {
+                "language": "ro",
+                "value": "Nu se știe dacă a fumat vreodată"
+              },
+              {
+                "language": "se",
+                "value": "Okänd om någonsin rökt"
+              },
+              {
+                "language": "hr",
+                "value": "Nepoznato ako je ikada pušio"
+              },
+              {
+                "language": "it",
+                "value": "Sconosciuto se mai fumato"
+              },
+              {
+                "language": "tr",
+                "value": "Hiç içip içmediği bilinmiyor"
+              }
+            ]
+          },
+          {
+            "code": "LA18981-3",
+            "display": "Current Heavy tobacco smoker",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Current Heavy tobacco smoker"
+              },
+              {
+                "language": "es",
+                "value": "Fumador empedernido actual"
+              },
+              {
+                "language": "de",
+                "value": "Aktueller starker Tabakraucher"
+              },
+              {
+                "language": "ro",
+                "value": "Actual Fumător intens de tutun"
+              },
+              {
+                "language": "se",
+                "value": "Nuvarande Tung tobaksrökare"
+              },
+              {
+                "language": "hr",
+                "value": "Trenutni teški pušač duhana"
+              },
+              {
+                "language": "it",
+                "value": "Fumatore attuale del tabacco pesante"
+              },
+              {
+                "language": "tr",
+                "value": "Mevcutta ağır sigara içicisi"
+              }
+            ]
+          },
+          {
+            "code": "LA18982-1",
+            "display": "Current Light tobacco smoker",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Current Light tobacco smoker"
+              },
+              {
+                "language": "es",
+                "value": "Fumador actual de tabaco ligero"
+              },
+              {
+                "language": "de",
+                "value": "Aktueller leichter Tabakraucher"
+              },
+              {
+                "language": "ro",
+                "value": "Actual Fumător de tutun Light"
+              },
+              {
+                "language": "se",
+                "value": "Aktuell lätt tobaksrökare"
+              },
+              {
+                "language": "hr",
+                "value": "Trenutni lagani pušač duhana"
+              },
+              {
+                "language": "it",
+                "value": "Fumatore di tabacco leggero attuale"
+              },
+              {
+                "language": "tr",
+                "value": "Mevcutta hafif sigara içicisi"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

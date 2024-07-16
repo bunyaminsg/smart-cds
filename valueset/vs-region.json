@@ -1,0 +1,74 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://kroniq.srdc.com.tr/fhir/ValueSet/score2-region",
+  "version": "1.0.0",
+  "name": "SCORE2 Region Risk",
+  "id": "vs-score2-region",
+  "date": "2023-07-19T11:33:06.965Z",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://srdc.com.tr/score2-region",
+        "concept": [
+          {
+            "code": "0",
+            "display": "Low risk region",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Low risk region"
+              },
+              {
+                "language": "es",
+                "value": "Región de bajo riesgo"
+              }
+            ]
+          },
+          {
+            "code": "1",
+            "display": "Moderate risk region",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Moderate risk region"
+              },
+              {
+                "language": "es",
+                "value": "Región de riesgo moderado"
+              }
+            ]
+          },
+          {
+            "code": "2",
+            "display": "High risk region",
+            "designation": [
+              {
+                "language": "en",
+                "value": "High risk region"
+              },
+              {
+                "language": "es",
+                "value": "Región de alto riesgo"
+              }
+            ]
+          },
+          {
+            "code": "2",
+            "display": "Very high risk region",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Very high risk region"
+              },
+              {
+                "language": "es",
+                "value": "Región de muy alto riesgo"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
