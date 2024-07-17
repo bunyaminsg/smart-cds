@@ -6,7 +6,7 @@ import util.{DateTimeUtil, FhirParseHelper}
 
 import scala.util.Try
 
-//noinspection ScalaDocMissingParameterDescription
+//noinspection ScalaDocMissingParameterDescription,DuplicatedCode
 object ACCAHAFlowExecution {
 
   /**
@@ -44,9 +44,9 @@ object ACCAHAFlowExecution {
   /**
    * Validates given prefetch and returns the ACC/AHA risk score
    */
-  def calculateACCRisk(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
-                       SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Diabetes: Seq[Condition],
-                       HypertensiveTreatment: Seq[MedicationStatement], Ethnicity: Seq[Observation]): Option[Double] = {
+  private def calculateACCRisk(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
+                               SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Diabetes: Seq[Condition],
+                               HypertensiveTreatment: Seq[MedicationStatement], Ethnicity: Seq[Observation]): Option[Double] = {
     val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
 
     val age = FhirParseHelper.getAge(patient)
@@ -82,7 +82,7 @@ object ACCAHAFlowExecution {
   /**
    * Determines the race of the patient based on Ethnicity observation
    */
-  def determineRace(ethnicity: Seq[Observation]): String = {
+  private def determineRace(ethnicity: Seq[Observation]): String = {
     val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
     if (ethnicityCodes.contains("46463-6")) "africanamerican" else "white"
   }
@@ -90,7 +90,7 @@ object ACCAHAFlowExecution {
   /**
    * Calculate ACC/AHA risk score for male patients
    */
-  def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Int, diabetes: Int, treatedHypertension: Int, race: String): Double = {
+  private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Int, diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
     val lnAge = math.log(age)
     val lnTotalCholesterol = math.log(totalCholesterol)
@@ -139,6 +139,7 @@ object ACCAHAFlowExecution {
       coefLnHDLCholesterol * lnHDLCholesterol +
       coefLnAgeLnHDLCholesterol * lnAge * lnHDLCholesterol +
       (if (treatedHypertension == 1) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
+      (if (treatedHypertension == 1) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
@@ -149,7 +150,7 @@ object ACCAHAFlowExecution {
   /**
    * Calculate ACC/AHA risk score for female patients
    */
-  def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Int, diabetes: Int, treatedHypertension: Int, race: String): Double = {
+  private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Int, diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
     val lnAge = math.log(age)
     val lnTotalCholesterol = math.log(totalCholesterol)
@@ -198,6 +199,7 @@ object ACCAHAFlowExecution {
       coefLnHDLCholesterol * lnHDLCholesterol +
       coefLnAgeLnHDLCholesterol * lnAge * lnHDLCholesterol +
       (if (treatedHypertension == 1) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
+      (if (treatedHypertension == 1) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
