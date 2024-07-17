@@ -1,0 +1,16 @@
+{
+  "hook": "calculate",
+  "title": "ACC/AHA Service",
+  "description": "",
+  "id": "acc_aha",
+  "prefetch": {
+    "patient": "Patient/{{context.patientId}}",
+    "TotalCholesterol": "Observation?patient=Patient/{{context.patientId}}&code={{config.TotalCholesterol}}&_sort=-date&_count=1",
+    "HDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.HDL}}&_sort=-date&_count=1",
+    "BP_SBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_SBP}}&_sort=-date&_count=1",
+    "HypertensiveTreatment": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.HypertensiveTreatment}}&_count=1",
+    "Diabetes": "Condition?patient=Patient/{{context.patientId}}&code={{config.Diabetes}}&_count=1",
+    "SmokingStatus": "Observation?patient=Patient/{{context.patientId}}&code={{config.SmokingStatus}}&_sort=-date&_count=1",
+    "Ethnicity": "Observation?patient=Patient/{{context.patientId}}&code=46463-6&_sort=-date&_count=1"
+  }
+}
