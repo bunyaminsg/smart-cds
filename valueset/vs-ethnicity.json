@@ -1,0 +1,88 @@
+{
+  "resourceType": "ValueSet",
+  "id": "4f97e33a-3a55-4b62-be0b-6726c316f28f",
+  "meta": {
+    "versionId": "8",
+    "lastUpdated": "2024-02-27T08:10:52.485Z",
+    "tag": [
+      {
+        "code": "custom",
+        "system": "https://fhir.moph.gov.qa/CodeSystem/value-set-type"
+      }
+    ]
+  },
+  "url": "https://fhir.moph.gov.qa/ValueSet/ethnicity",
+  "name": "vs-ethnicity",
+  "status": "active",
+  "date": "2024-02-27T08:10:53.537Z",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "20230301",
+        "concept": [
+          {
+            "code": "90027003",
+            "display": "Arab",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Arab"
+              }
+            ]
+          },
+          {
+            "code": "315280000",
+            "display": "Asian",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Asian"
+              }
+            ]
+          },
+          {
+            "code": "413465009",
+            "display": "Afro-Caribbean",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Afro-Caribbean"
+              }
+            ]
+          },
+          {
+            "code": "18167009",
+            "display": "Black African",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Black African"
+              }
+            ]
+          },
+          {
+            "code": "185984009",
+            "display": "White",
+            "designation": [
+              {
+                "language": "en",
+                "value": "White"
+              }
+            ]
+          },
+          {
+            "code": "74964007",
+            "display": "Other",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Other"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
