@@ -11,6 +11,6 @@
     "HypertensiveTreatment": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.HypertensiveTreatment}}&_count=1",
     "Diabetes": "Condition?patient=Patient/{{context.patientId}}&code={{config.Diabetes}}&_count=1",
     "SmokingStatus": "Observation?patient=Patient/{{context.patientId}}&code={{config.SmokingStatus}}&_sort=-date&_count=1",
-    "Ethnicity": "Observation?patient=Patient/{{context.patientId}}&code=46463-6&_sort=-date&_count=1"
+    "Ethnicity": "Observation?patient=Patient/{{context.patientId}}&code={{config.Ethnicity}}&_sort=-date&_count=1"
   }
 }
