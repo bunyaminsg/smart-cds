@@ -1,0 +1,144 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://kroniq.srdc.com.tr/fhir/ValueSet/qrisk3-ethnicity",
+  "version": "1.0.0",
+  "name": "QRisk3 Ethnicity Risk",
+  "id": "vs-qrisk3-ethnicity",
+  "date": "2023-07-19T11:33:06.965Z",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://srdc.com.tr/qrisk3-region",
+        "concept": [
+          {
+            "code": "0",
+            "display": "White or not stated",
+            "designation": [
+              {
+                "language": "en",
+                "value": "White or not stated"
+              },
+              {
+                "language": "es",
+                "value": "Blanco o no declarado"
+              }
+            ]
+          },
+          {
+            "code": "1",
+            "display": "Indian",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Indian"
+              },
+              {
+                "language": "es",
+                "value": "indio"
+              }
+            ]
+          },
+          {
+            "code": "2",
+            "display": "Pakistani",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Pakistani"
+              },
+              {
+                "language": "es",
+                "value": "pakistaní"
+              }
+            ]
+          },
+          {
+            "code": "3",
+            "display": "Bangladeshi",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Bangladeshi"
+              },
+              {
+                "language": "es",
+                "value": "bangladesí"
+              }
+            ]
+          },
+          {
+            "code": "4",
+            "display": "Other Asian",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Other Asian"
+              },
+              {
+                "language": "es",
+                "value": "Otro asiático"
+              }
+            ]
+          },
+          {
+            "code": "5",
+            "display": "Black Caribbean",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Black Caribbean"
+              },
+              {
+                "language": "es",
+                "value": "Caribe negro"
+              }
+            ]
+          },
+          {
+            "code": "6",
+            "display": "Black African",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Black African"
+              },
+              {
+                "language": "es",
+                "value": "negro africano"
+              }
+            ]
+          },
+          {
+            "code": "7",
+            "display": "Chinese",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Chinese"
+              },
+              {
+                "language": "es",
+                "value": "Chino"
+              }
+            ]
+          },
+          {
+            "code": "8",
+            "display": "Other ethnic group",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Other ethnic group"
+              },
+              {
+                "language": "es",
+                "value": "Otro grupo étnico"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
