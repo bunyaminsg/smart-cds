@@ -30,13 +30,14 @@ object ACCAHAFlowExecution {
                   responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
 
     var output = responseBuilder
-    val riskScore = calculateACCRisk(patient, TotalCholesterol, HDLCholesterol, SystolicBP, SmokingStatus, Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity)
+    val riskScores = calculateACCRisk(patient, TotalCholesterol, HDLCholesterol, SystolicBP, SmokingStatus, Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity)
 
-    riskScore match {
-      case Some(score) =>
+    riskScores match {
+      case Some((patientScore, healthyScore)) =>
         output = output.withCard(_.loadCardWithPostTranslation("card-score",
           "effectiveDate" -> DateTimeUtil.zonedNow(),
-          "scoreValue" -> score
+          "patientScoreValue" -> patientScore,
+          "healthyScoreValue" -> healthyScore
         ))
       case None =>
         println("Unable to calculate ACC/AHA risk score due to missing or incomplete data.")
@@ -50,7 +51,7 @@ object ACCAHAFlowExecution {
    */
   private def calculateACCRisk(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
                                SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition],
-                               HypertensiveTreatment: Seq[MedicationStatement], Ethnicity: Seq[Observation]): Option[Double] = {
+                               HypertensiveTreatment: Seq[MedicationStatement], Ethnicity: Seq[Observation]): Option[(Double, Double)] = {
     def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
 
     val age = FhirParseHelper.getAge(patient)
@@ -78,14 +79,19 @@ object ACCAHAFlowExecution {
 
     gender match {
       case Some("male") =>
-        Some(calculateACCRiskM(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
+        val patientScore = calculateACCRiskM(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race)
+        val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, race)
+        Some(patientScore, healthyScore)
       case Some("female") =>
-        Some(calculateACCRiskF(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
+        val patientScore = calculateACCRiskF(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race)
+        val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, race)
+        Some(patientScore, healthyScore)
       case _ =>
         println("Gender not specified or invalid")
         None
     }
   }
+
 
   /**
    * Determines the race of the patient based on Ethnicity observation
