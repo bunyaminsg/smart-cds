@@ -1,5 +1,6 @@
-package cds
+package srdc.smartcds.cds
 
+import srdc.smartcds.cds.service.ACCAHAService
 import srdc.smartcds.cds.service.{DefinitionService, QRiskService, Score2Service, SmartRiskService}
 import io.onfhir.cds.service.{CdsServiceContext, ICdsService, ICdsServiceFactory}
 

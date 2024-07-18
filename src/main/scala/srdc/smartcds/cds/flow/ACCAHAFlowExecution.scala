@@ -1,8 +1,8 @@
-package cds.flow
+package srdc.smartcds.cds.flow
 
 import io.onfhir.cds.model.CdsResponseBuilder
-import model.fhir.{Condition, MedicationStatement, Observation, Patient}
-import util.{DateTimeUtil, FhirParseHelper}
+import srdc.smartcds.model.fhir.{Condition, MedicationStatement, Observation, Patient}
+import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper}
 
 import scala.util.Try
 
@@ -103,11 +103,10 @@ object ACCAHAFlowExecution {
     if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white"
   }
 
-
   /**
    * Calculate ACC/AHA risk score for male patients
    */
-  private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Int, diabetes: Int, treatedHypertension: Int, race: String): Double = {
+  private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double, diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
     val lnAge = math.log(age)
     val lnTotalCholesterol = math.log(totalCholesterol)
@@ -121,27 +120,27 @@ object ACCAHAFlowExecution {
         0.302, // lnTotalCholesterol
         0.0, // lnAge * lnTotalCholesterol
         -0.307, // lnHDLCholesterol
-        0, // lnAge * lnHDLCholesterol
+        0.0, // lnAge * lnHDLCholesterol
         1.916, // lnTreatedSBP
-        0, // lnAge * lnTreatedSBP
+        0.0, // lnAge * lnTreatedSBP
         1.809, // lnUntreatedSBP
-        0, // lnAge * lnUntreatedSBP
+        0.0, // lnAge * lnUntreatedSBP
         if (smoker == 1) 0.549 else 0.0, // smoker
-        0, // lnAge * smoker
+        0.0, // lnAge * smoker
         if (diabetes == 1) 0.645 else 0.0, // diabetes
         0.9533 // baselineSurvival
       )
       case _ => (
         12.344, // lnAge
-        0, // lnAgeSquared
+        0.0, // lnAgeSquared
         11.853, // lnTotalCholesterol
         -2.664, // lnAge * lnTotalCholesterol
         -7.990, // lnHDLCholesterol
         1.769, // lnAge * lnHDLCholesterol
         1.797, // lnTreatedSBP
-        0, // lnAge * lnTreatedSBP
+        0.0, // lnAge * lnTreatedSBP
         1.764, // lnUntreatedSBP
-        0, // lnAge * lnUntreatedSBP
+        0.0, // lnAge * lnUntreatedSBP
         if (smoker == 1) 7.837 else 0.0, // smoker
         -1.795, // lnAge * smoker
         if (diabetes == 1) 0.658 else 0.0, // diabetes
@@ -167,7 +166,7 @@ object ACCAHAFlowExecution {
   /**
    * Calculate ACC/AHA risk score for female patients
    */
-  private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Int, diabetes: Int, treatedHypertension: Int, race: String): Double = {
+  private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double, diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
     val lnAge = math.log(age)
     val lnTotalCholesterol = math.log(totalCholesterol)
@@ -187,7 +186,7 @@ object ACCAHAFlowExecution {
         27.820, // lnUntreatedSBP
         -6.087, // lnAge * lnUntreatedSBP
         if (smoker == 1) 0.691 else 0.0, // smoker
-        0, // lnAge * smoker
+        0.0, // lnAge * smoker
         if (diabetes == 1) 0.874 else 0.0, // diabetes
         0.9533 // baselineSurvival
       )
@@ -199,9 +198,9 @@ object ACCAHAFlowExecution {
         -13.578, // lnHDLCholesterol
         3.149, // lnAge * lnHDLCholesterol
         2.019, // lnTreatedSBP
-        0, // lnAge * lnTreatedSBP
+        0.0, // lnAge * lnTreatedSBP
         1.957, // lnUntreatedSBP
-        0, // lnAge * lnUntreatedSBP
+        0.0, // lnAge * lnUntreatedSBP
         if (smoker == 1) 7.574 else 0.0, // smoker
         -1.665, // lnAge * smoker
         if (diabetes == 1) 0.661 else 0.0, // diabetes
