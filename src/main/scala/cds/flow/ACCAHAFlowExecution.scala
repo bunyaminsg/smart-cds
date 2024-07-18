@@ -75,7 +75,7 @@ object ACCAHAFlowExecution {
     } else {
       Seq("266919005")
     }
-    val smoker = if (Seq("LA18976-3", "LA18977-1", "LA18981-3", "LA18982-1").intersect(smoking).nonEmpty) 1 else 0
+    val smoker = if (Seq("LA18976-3", "LA18977-1", "LA18981-3", "LA18982-1", "LA18979-7").intersect(smoking).nonEmpty) 1 else 0
 
     if (gender.contains("male")) {
       Some(calculateACCRiskM(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
