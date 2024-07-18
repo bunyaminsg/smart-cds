@@ -32,11 +32,14 @@ object ACCAHAFlowExecution {
     var output = responseBuilder
     val riskScore = calculateACCRisk(patient, TotalCholesterol, HDLCholesterol, SystolicBP, SmokingStatus, Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity)
 
-    if (riskScore.isDefined) {
-      output = output.withCard(_.loadCardWithPostTranslation("card-score",
-        "effectiveDate" -> DateTimeUtil.zonedNow(),
-        "scoreValue" -> riskScore.get
-      ))
+    riskScore match {
+      case Some(score) =>
+        output = output.withCard(_.loadCardWithPostTranslation("card-score",
+          "effectiveDate" -> DateTimeUtil.zonedNow(),
+          "scoreValue" -> score
+        ))
+      case None =>
+        println("Unable to calculate ACC/AHA risk score due to missing or incomplete data.")
     }
 
     output
@@ -48,7 +51,7 @@ object ACCAHAFlowExecution {
   private def calculateACCRisk(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
                                SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition],
                                HypertensiveTreatment: Seq[MedicationStatement], Ethnicity: Seq[Observation]): Option[Double] = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
+    def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
 
     val age = FhirParseHelper.getAge(patient)
     val gender = patient.gender
@@ -70,17 +73,17 @@ object ACCAHAFlowExecution {
     val hdlCholesterol = hdlCholesterolOpt.get
     val sbp = systolicBPOpt.get
 
-    val smoking = if (smokingObs.isDefined) {
-      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
-    } else {
-      Seq("266919005")
-    }
+    val smoking = smokingObs.map(_.valueCodeableConcept.get.coding.map(_.code).toSeq).getOrElse(Seq("266919005"))
     val smoker = if (Seq("LA18976-3", "LA18977-1", "LA18981-3", "LA18982-1", "LA18979-7").intersect(smoking).nonEmpty) 1 else 0
 
-    if (gender.contains("male")) {
-      Some(calculateACCRiskM(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
-    } else {
-      Some(calculateACCRiskF(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
+    gender match {
+      case Some("male") =>
+        Some(calculateACCRiskM(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
+      case Some("female") =>
+        Some(calculateACCRiskF(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race))
+      case _ =>
+        println("Gender not specified or invalid")
+        None
     }
   }
 
