@@ -88,8 +88,10 @@ object ACCAHAFlowExecution {
    * Determines the race of the patient based on Ethnicity observation
    */
   private def determineRace(ethnicity: Seq[Observation]): String = {
+    val blackEthnicityCodes = Seq("413465009", "18167009")
     val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
-    if (ethnicityCodes.contains("46463-6")) "africanamerican" else "white"
+
+    if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white"
   }
 
   /**
