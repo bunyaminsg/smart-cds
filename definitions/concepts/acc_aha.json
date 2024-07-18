@@ -34,7 +34,12 @@
         "en": "Hypertensive Treatment"
       }
     },
-    "Diabetes": {
+    "Type1Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "required": true
+    },
+    "Type2Diabetes": {
       "resourceType": "Condition",
       "type": "boolean",
       "required": true
