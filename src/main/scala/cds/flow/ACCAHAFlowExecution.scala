@@ -91,11 +91,12 @@ object ACCAHAFlowExecution {
    * Determines the race of the patient based on Ethnicity observation
    */
   private def determineRace(ethnicity: Seq[Observation]): String = {
-    val blackEthnicityCodes = Seq("413465009", "18167009")
+    val blackEthnicityCodes = Seq("LA6162-7") // Black or African-American LOINC code
     val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
 
     if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white"
   }
+
 
   /**
    * Calculate ACC/AHA risk score for male patients

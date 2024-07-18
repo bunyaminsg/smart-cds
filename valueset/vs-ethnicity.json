@@ -18,21 +18,21 @@
   "compose": {
     "include": [
       {
-        "system": "http://snomed.info/sct",
+        "system": "http://loinc.org",
         "version": "20230301",
         "concept": [
           {
-            "code": "90027003",
-            "display": "Arab",
+            "code": "LA6155-1",
+            "display": "American Indian or Alaska Native",
             "designation": [
               {
                 "language": "en",
-                "value": "Arab"
+                "value": "American Indian or Alaska Native"
               }
             ]
           },
           {
-            "code": "315280000",
+            "code": "LA6156-9",
             "display": "Asian",
             "designation": [
               {
@@ -42,27 +42,37 @@
             ]
           },
           {
-            "code": "413465009",
-            "display": "Afro-Caribbean",
+            "code": "LA6162-7",
+            "display": "Black or African-American",
             "designation": [
               {
                 "language": "en",
-                "value": "Afro-Caribbean"
+                "value": "Black or African-American"
               }
             ]
           },
           {
-            "code": "18167009",
-            "display": "Black African",
+            "code": "LA6214-6",
+            "display": "Hispanic or Latino",
             "designation": [
               {
                 "language": "en",
-                "value": "Black African"
+                "value": "Hispanic or Latino"
               }
             ]
           },
           {
-            "code": "185984009",
+            "code": "LA6266-6",
+            "display": "Native Hawaiian or Pacific Islander",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Native Hawaiian or Pacific Islander"
+              }
+            ]
+          },
+          {
+            "code": "LA4457-3",
             "display": "White",
             "designation": [
               {
@@ -72,12 +82,12 @@
             ]
           },
           {
-            "code": "74964007",
-            "display": "Other",
+            "code": "LA4489-6",
+            "display": "Unknown",
             "designation": [
               {
                 "language": "en",
-                "value": "Other"
+                "value": "Unknown"
               }
             ]
           }
