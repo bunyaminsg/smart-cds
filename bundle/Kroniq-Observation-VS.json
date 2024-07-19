@@ -18,7 +18,7 @@
               "system": "http://srdc.com.tr/custom",
               "concept": [
                 {
-                  "code": "qrisk3-region",
+                  "code": "qrisk3-ethnicity",
                   "display": "Ethnicity",
                   "designation": [
                     {
