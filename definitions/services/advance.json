@@ -10,10 +10,12 @@
     "HypertensiveTreatment": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.HypertensiveTreatment}}&_count=1",
     "HbA1C": "Observation?patient=Patient/{{context.patientId}}&code={{config.HbA1C}}&_sort=-date&_count=1",
     "ACR": "Observation?patient=Patient/{{context.patientId}}&code={{config.ACR}}&_sort=-date&_count=1",
+    "TotalCholesterol": "Observation?patient=Patient/{{context.patientId}}&code={{config.TotalCholesterol}}&_sort=-date&_count=1",
+    "HDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.HDL}}&_sort=-date&_count=1",
     "NonHDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.NonHDL}}&_sort=-date&_count=1",
     "BP_SBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_SBP}}&_sort=-date&_count=1",
     "BP_DBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_DBP}}&_sort=-date&_count=1",
-    "Type1Diabetes": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_DBP}}&_sort=-date&_count=1",
-    "Type2Diabetes": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_DBP}}&_sort=date&_count=1"
+    "Type1Diabetes": "Observation?patient=Patient/{{context.patientId}}&code={{config.Type1DiabetesP}}&_sort=-date&_count=1",
+    "Type2Diabetes": "Observation?patient=Patient/{{context.patientId}}&code={{config.Type2Diabetes}}&_sort=date&_count=1"
   }
 }

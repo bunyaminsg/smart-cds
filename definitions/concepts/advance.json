@@ -33,6 +33,22 @@
       "max": 999,
       "required": true
     },
+    "TotalCholesterol": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mmol/l",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "HDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mmol/l",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
 
     "NonHDL": {
       "resourceType": "Observation",
