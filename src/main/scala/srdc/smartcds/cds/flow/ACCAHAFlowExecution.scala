@@ -4,6 +4,7 @@ import io.onfhir.cds.model.CdsResponseBuilder
 import srdc.smartcds.model.fhir.{Condition, MedicationStatement, Observation, Patient}
 import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper}
 
+import scala.math.{exp, pow}
 import scala.util.Try
 
 //noinspection ScalaDocMissingParameterDescription,DuplicatedCode
@@ -181,7 +182,7 @@ object ACCAHAFlowExecution {
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
 
-    100.0 * (1 - math.pow(baselineSurvival, math.exp(lnSum)))
+    100.0 * (1 - pow(baselineSurvival, exp(lnSum)))
   }
 
   /**
