@@ -124,6 +124,9 @@ object ACCAHAFlowExecution {
   private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
+    println(s"Calculating ACC Risk for male with values: age=$age, totalCholesterol=$totalCholesterol," +
+      s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
+
     val lnAge = math.log(age)
     val lnTotalCholesterol = math.log(totalCholesterol)
     val lnHDLCholesterol = math.log(hdlCholesterol)
@@ -146,7 +149,7 @@ object ACCAHAFlowExecution {
         if (smoker == 1) 0.549 else 0.0, // smoker
         0.0, // lnAge * smoker
         if (diabetes == 1) 0.645 else 0.0, // diabetes
-        0.9533 // baselineSurvival
+        0.8954 // baselineSurvival
       )
       case _ => (
         12.344, // lnAge
@@ -162,7 +165,7 @@ object ACCAHAFlowExecution {
         if (smoker == 1) 7.837 else 0.0, // smoker
         -1.795, // lnAge * smoker
         if (diabetes == 1) 0.658 else 0.0, // diabetes
-        0.9665 // baselineSurvival
+        0.9144 // baselineSurvival
       )
     }
 
@@ -172,8 +175,8 @@ object ACCAHAFlowExecution {
       coefLnAgeLnTotalCholesterol * lnAge * lnTotalCholesterol +
       coefLnHDLCholesterol * lnHDLCholesterol +
       coefLnAgeLnHDLCholesterol * lnAge * lnHDLCholesterol +
-      (if (treatedHypertension == 1) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
-      (if (treatedHypertension == 1) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
+      (if (treatedHypertension == 1.0) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
+      (if (treatedHypertension == 1.0) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
@@ -186,6 +189,9 @@ object ACCAHAFlowExecution {
    */
   private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
+
+    println(s"Calculating ACC Risk for female with values: age=$age, totalCholesterol=$totalCholesterol," +
+      s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
 
     val lnAge = math.log(age)
     val lnTotalCholesterol = math.log(totalCholesterol)
