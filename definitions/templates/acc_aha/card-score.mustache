@@ -25,22 +25,14 @@
 "code": {
 "coding": [
 {
-"system": "http://loinc.org",
-"code": "79423-0",
+"system": "http://snomed.info/sct",
+"code": "710091000000109",
 "display": "ACC/AHA cardiovascular disease 10 year risk score"
 }
 ]
 },
-"extension": [
-{
-"url": "https://kroniq.srdc.com.tr/fhir/StructureDefinition/context",
-"valueReference": {
-"reference": "EpisodeOfCare/"
-}
-}
-],
 "valueQuantity": {
-"value": {{scoreValue}},
+"value": {{patientScoreValue}},
 "unit": "%",
 "system": "http://unitsofmeasure.org",
 "code": "%"
@@ -48,7 +40,7 @@
 "referenceRange": [
 {
 "high": {
-"value": {{healthyValue}}
+"value": {{healthyScoreValue}}
 }
 }
 ]
