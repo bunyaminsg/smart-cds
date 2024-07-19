@@ -79,7 +79,7 @@
     "Ethnicity": {
       "resourceType": "Observation",
       "type": "CodeableConcept",
-      "select": "ValueSet/vs-ethnicity",
+      "select": "ValueSet/vs-qrisk3-ethnicity",
       "required": true
     },
     "SystemicLupusErythematosus": {
