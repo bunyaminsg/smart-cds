@@ -9,6 +9,31 @@ import scala.util.Try
 
 object QRisk3FlowExecution {
 
+  /**
+   * Executes QRISK3 calculation service
+   * @param patient Patient resource
+   * @param AtrialFibrillation Atrial Fibrillation Condition
+   * @param RheumatoidArthritis Rheumatoid Arthritis Condition
+   * @param CKD3_4_5 Chronic kidney disease (stage 3, 4 or 5)
+   * @param Type1Diabetes Type 1 Diabetes Condition
+   * @param Type2Diabetes Type 1 Diabetes Condition
+   * @param HypertensiveTreatment Hypertensive Treatment
+   * @param BMI Body Mass Index Observation
+   * @param TotalCholesterol Total Cholesterol Observation
+   * @param HDL HDL Observation
+   * @param BP_SBP Systolic Blood Pressure Observation
+   * @param SmokingStatus Smoking Status Observation
+   * @param CVD_FMH Angina or heart attack in a 1st degree relative
+   * @param Corticosteroids Cortico Steroid Medical Treatment
+   * @param Antipsychotics Antipsychotic Medical Treatment
+   * @param Ethnicity Ethnicity Observation
+   * @param SystemicLupusErythematosus Systemic Lupus Erythematosus Condition
+   * @param SevereMentalIllness Severe Mental Illness Condition
+   * @param ErectileDysfunction Erectile Dysfunction Condition
+   * @param Migraine Migraine Condition
+   * @param responseBuilder Response Builder
+   * @return
+   */
   def executeFlow(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD3_4_5: Seq[Condition],
                   Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
                   BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
@@ -32,7 +57,9 @@ object QRisk3FlowExecution {
     output
   }
 
-
+  /**
+   * Validates given prefetch and returns the QRISK3 score
+   */
   def calculateQRisk(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD3_4_5: Seq[Condition],
                      Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
                      BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
@@ -146,6 +173,10 @@ object QRisk3FlowExecution {
       Some(patientScore,healthyScore)
     }
   }
+
+  /**
+   * Calculate QRISK3 score for male patients
+   */
   def cvdMaleRaw(
                   age: Int, b_AF: Int, b_atypicalantipsy: Int, b_corticosteroids: Int, b_impotence2: Int, b_migraine: Int, b_ra: Int, b_renal: Int, b_semi: Int, b_sle: Int, b_treatedhyp: Int, b_type1: Int, b_type2: Int, bmi: Double, ethrisk: Int, fh_cvd: Int, rati: Double, sbp: Double, sbps5: Double, smoke_cat: Int, surv: Int, town: Double
                 ): Double = {
@@ -292,8 +323,9 @@ object QRisk3FlowExecution {
     score
   }
 
-
-
+  /**
+   * Calculate QRISK3 score for female patients
+   */
   def cvdFemaleRaw(
                     age: Int, b_AF: Int, b_atypicalantipsy: Int, b_corticosteroids: Int, b_migraine: Int, b_ra: Int, b_renal: Int, b_semi: Int, b_sle: Int, b_treatedhyp: Int, b_type1: Int, b_type2: Int, bmi: Double, ethrisk: Int, fh_cvd: Int, rati: Double, sbp: Double, sbps5: Double, smoke_cat: Int, surv: Int, town: Double
                   ): Double = {
