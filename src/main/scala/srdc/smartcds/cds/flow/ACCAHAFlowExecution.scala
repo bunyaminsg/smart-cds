@@ -62,11 +62,26 @@ object ACCAHAFlowExecution {
 
     val totalCholesterolOpt = Try(TotalCholesterol.head.valueQuantity.get.value.get).toOption
     val hdlCholesterolOpt = Try(HDLCholesterol.head.valueQuantity.get.value.get).toOption
-    val systolicBPOpt = Try(SystolicBP.head.valueQuantity.get.value.get).toOption
+    val systolicBPOpt = FhirParseHelper.getSystolicBP(SystolicBP)
     val smokingObs = SmokingStatus.headOption
 
-    if (totalCholesterolOpt.isEmpty || hdlCholesterolOpt.isEmpty || systolicBPOpt.isEmpty || smokingObs.isEmpty) {
-      println("Total Cholesterol, HDL Cholesterol, Systolic BP or Smoking Status not found")
+    if (totalCholesterolOpt.isEmpty) {
+      println("Total Cholesterol not found")
+      return None
+    }
+
+    if (hdlCholesterolOpt.isEmpty) {
+      println("HDL not found")
+      return None
+    }
+
+    if (systolicBPOpt.isEmpty) {
+      println("SBP not found")
+      return None
+    }
+
+    if (smokingObs.isEmpty) {
+      println("smoking not found")
       return None
     }
 
