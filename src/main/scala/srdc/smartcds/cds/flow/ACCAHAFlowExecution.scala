@@ -4,10 +4,10 @@ import io.onfhir.cds.model.CdsResponseBuilder
 import srdc.smartcds.model.fhir.{Condition, MedicationStatement, Observation, Patient}
 import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper}
 
-import scala.math.{exp, pow}
+import scala.math.{exp, log, pow}
 import scala.util.Try
 
-//noinspection ScalaDocMissingParameterDescription,DuplicatedCode
+//noinspection ScalaDocMissingParameterDescription
 object ACCAHAFlowExecution {
 
   /**
@@ -108,7 +108,6 @@ object ACCAHAFlowExecution {
     }
   }
 
-
   /**
    * Determines the race of the patient based on Ethnicity observation
    */
@@ -128,14 +127,14 @@ object ACCAHAFlowExecution {
     println(s"Calculating ACC Risk for male with values: age=$age, totalCholesterol=$totalCholesterol," +
       s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
 
-    val lnAge = math.log(age)
-    val lnTotalCholesterol = math.log(totalCholesterol)
-    val lnHDLCholesterol = math.log(hdlCholesterol)
-    val lnSBP = math.log(sbp)
+    val lnAge = log(age)
+    val lnTotalCholesterol = log(totalCholesterol)
+    val lnHDLCholesterol = log(hdlCholesterol)
+    val lnSBP = log(sbp)
 
     val (coefLnAge, coefLnAgeSquared, coefLnTotalCholesterol, coefLnAgeLnTotalCholesterol, coefLnHDLCholesterol,
     coefLnAgeLnHDLCholesterol, coefLnTreatedSBP, coefLnAgeLnTreatedSBP, coefLnUntreatedSBP, coefLnAgeLnUntreatedSBP,
-    smokerCoefficient, coefLnAgeSmoker, diabetesCoefficient, baselineSurvival) = race match {
+    smokerCoefficient, coefLnAgeSmoker, diabetesCoefficient, baselineSurvival, mean) = race match {
       case "africanamerican" => (
         2.469, // lnAge
         0.0, // lnAgeSquared
@@ -150,7 +149,8 @@ object ACCAHAFlowExecution {
         if (smoker == 1) 0.549 else 0.0, // smoker
         0.0, // lnAge * smoker
         if (diabetes == 1) 0.645 else 0.0, // diabetes
-        0.8954 // baselineSurvival
+        0.8954, // baselineSurvival
+        19.54
       )
       case _ => (
         12.344, // lnAge
@@ -166,23 +166,24 @@ object ACCAHAFlowExecution {
         if (smoker == 1) 7.837 else 0.0, // smoker
         -1.795, // lnAge * smoker
         if (diabetes == 1) 0.658 else 0.0, // diabetes
-        0.9144 // baselineSurvival
+        0.9144, // baselineSurvival
+        61.18
       )
     }
 
     val lnSum = coefLnAge * lnAge +
-      coefLnAgeSquared * math.pow(lnAge, 2) +
+      coefLnAgeSquared * pow(lnAge, 2) +
       coefLnTotalCholesterol * lnTotalCholesterol +
       coefLnAgeLnTotalCholesterol * lnAge * lnTotalCholesterol +
       coefLnHDLCholesterol * lnHDLCholesterol +
       coefLnAgeLnHDLCholesterol * lnAge * lnHDLCholesterol +
-      (if (treatedHypertension == 1.0) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
-      (if (treatedHypertension == 1.0) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
+      (if (treatedHypertension == 1) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
+      (if (treatedHypertension == 1) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
 
-    100.0 * (1 - pow(baselineSurvival, exp(lnSum)))
+    100 * (1 - baselineSurvival * exp(lnSum - mean))
   }
 
   /**
@@ -194,14 +195,14 @@ object ACCAHAFlowExecution {
     println(s"Calculating ACC Risk for female with values: age=$age, totalCholesterol=$totalCholesterol," +
       s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
 
-    val lnAge = math.log(age)
-    val lnTotalCholesterol = math.log(totalCholesterol)
-    val lnHDLCholesterol = math.log(hdlCholesterol)
-    val lnSBP = math.log(sbp)
+    val lnAge = log(age)
+    val lnTotalCholesterol = log(totalCholesterol)
+    val lnHDLCholesterol = log(hdlCholesterol)
+    val lnSBP = log(sbp)
 
     val (coefLnAge, coefLnAgeSquared, coefLnTotalCholesterol, coefLnAgeLnTotalCholesterol, coefLnHDLCholesterol,
     coefLnAgeLnHDLCholesterol, coefLnTreatedSBP, coefLnAgeLnTreatedSBP, coefLnUntreatedSBP, coefLnAgeLnUntreatedSBP,
-    smokerCoefficient, coefLnAgeSmoker, diabetesCoefficient, baselineSurvival) = race match {
+    smokerCoefficient, coefLnAgeSmoker, diabetesCoefficient, baselineSurvival, mean) = race match {
       case "africanamerican" => (
         17.114, // lnAge
         0.0, // lnAgeSquared
@@ -216,7 +217,8 @@ object ACCAHAFlowExecution {
         if (smoker == 1) 0.691 else 0.0, // smoker
         0.0, // lnAge * smoker
         if (diabetes == 1) 0.874 else 0.0, // diabetes
-        0.9533 // baselineSurvival
+        0.9533, // baselineSurvival
+        86.61
       )
       case _ => (
         -29.799, // lnAge
@@ -232,12 +234,13 @@ object ACCAHAFlowExecution {
         if (smoker == 1) 7.574 else 0.0, // smoker
         -1.665, // lnAge * smoker
         if (diabetes == 1) 0.661 else 0.0, // diabetes
-        0.9665 // baselineSurvival
+        0.9665, // baselineSurvival
+        -29.18
       )
     }
 
     val lnSum = coefLnAge * lnAge +
-      coefLnAgeSquared * math.pow(lnAge, 2) +
+      coefLnAgeSquared * pow(lnAge, 2) +
       coefLnTotalCholesterol * lnTotalCholesterol +
       coefLnAgeLnTotalCholesterol * lnAge * lnTotalCholesterol +
       coefLnHDLCholesterol * lnHDLCholesterol +
@@ -248,6 +251,6 @@ object ACCAHAFlowExecution {
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
 
-    100.0 * (1 - math.pow(baselineSurvival, math.exp(lnSum)))
+    100 * (1 - baselineSurvival * exp(lnSum - mean))
   }
 }
