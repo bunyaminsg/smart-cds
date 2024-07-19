@@ -1,0 +1,75 @@
+{
+  "serviceId": "advance",
+  "concepts": {
+    "AtrialFibrillation": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "DiabeticRetinopathy": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "HypertensiveTreatment": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "Hypertensive Treatment"
+      }
+    },
+    "HbA1C": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "%",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+    "ACR": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/g",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+
+    "NonHDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mmol/l",
+      "min": 0,
+      "max": 999,
+      "required": true
+    },
+
+    "BP_SBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "SystolicBP",
+      "required": true
+    },
+    "BP_DBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "DiastolicBP",
+      "required": true
+    },
+
+
+    "Type1Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Type2Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    }
+  }
+}
