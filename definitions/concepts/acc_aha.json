@@ -36,13 +36,11 @@
     },
     "Type1Diabetes": {
       "resourceType": "Condition",
-      "type": "boolean",
-      "required": true
+      "type": "boolean"
     },
     "Type2Diabetes": {
       "resourceType": "Condition",
-      "type": "boolean",
-      "required": true
+      "type": "boolean"
     },
     "SmokingStatus": {
       "resourceType": "Observation",
