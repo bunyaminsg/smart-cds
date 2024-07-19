@@ -150,7 +150,7 @@ object ACCAHAFlowExecution {
         0.0, // lnAge * smoker
         if (diabetes == 1) 0.645 else 0.0, // diabetes
         0.8954, // baselineSurvival
-        19.54
+        19.54 // mean
       )
       case _ => (
         12.344, // lnAge
@@ -167,7 +167,7 @@ object ACCAHAFlowExecution {
         -1.795, // lnAge * smoker
         if (diabetes == 1) 0.658 else 0.0, // diabetes
         0.9144, // baselineSurvival
-        61.18
+        61.18 // mean
       )
     }
 
@@ -183,7 +183,7 @@ object ACCAHAFlowExecution {
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
 
-    100 * (1 - baselineSurvival * exp(lnSum - mean))
+    100 * (1 - pow(baselineSurvival, exp(lnSum - mean)))
   }
 
   /**
@@ -218,7 +218,7 @@ object ACCAHAFlowExecution {
         0.0, // lnAge * smoker
         if (diabetes == 1) 0.874 else 0.0, // diabetes
         0.9533, // baselineSurvival
-        86.61
+        86.61 // mean
       )
       case _ => (
         -29.799, // lnAge
@@ -235,7 +235,7 @@ object ACCAHAFlowExecution {
         -1.665, // lnAge * smoker
         if (diabetes == 1) 0.661 else 0.0, // diabetes
         0.9665, // baselineSurvival
-        -29.18
+        -29.18 // mean
       )
     }
 
@@ -251,6 +251,6 @@ object ACCAHAFlowExecution {
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
 
-    100 * (1 - baselineSurvival * exp(lnSum - mean))
+    100 * (1 - pow(baselineSurvival, exp(lnSum - mean)))
   }
 }
