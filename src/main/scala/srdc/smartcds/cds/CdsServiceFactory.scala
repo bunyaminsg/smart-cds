@@ -1,6 +1,6 @@
 package srdc.smartcds.cds
 
-import srdc.smartcds.cds.service.{DefinitionService, QRiskService, Score2Service, SmartRiskService}
+import srdc.smartcds.cds.service.{DefinitionService, QRiskService, Score2Service, SmartRiskService, AdvanceService}
 import io.onfhir.cds.service.{CdsServiceContext, ICdsService, ICdsServiceFactory}
 
 object CdsServiceFactory extends ICdsServiceFactory {
@@ -8,7 +8,7 @@ object CdsServiceFactory extends ICdsServiceFactory {
   /**
    * Service IDs implemented in the project
    */
-  val servicesSupported: Set[String] = Set("qrisk", "definition", "score2", "smart")
+  val servicesSupported: Set[String] = Set("qrisk", "definition", "score2", "smart", "advance")
 
   /**
    * Checks if there is an implemented service with the given service ID
@@ -29,6 +29,7 @@ object CdsServiceFactory extends ICdsServiceFactory {
       case "qrisk" => new QRiskService(cdsServiceContext)
       case "definition" => new DefinitionService(cdsServiceContext)
       case "score2" => new Score2Service(cdsServiceContext)
+      case "advance" => new AdvanceService(cdsServiceContext)
       case "smart" => new SmartRiskService(cdsServiceContext)
       case other => throw new Exception(s"Service $other not supported!")
     }
