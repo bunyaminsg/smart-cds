@@ -1,10 +1,10 @@
 package srdc.smartcds.cds.service
 
-import srdc.smartcds.cds.flow.ACCAHAFlowExecution
 import io.onfhir.cds.api.model.CdsResponse
 import io.onfhir.cds.service.{BaseCdsService, CdsServiceContext, CdsServiceRequest}
-import srdc.smartcds.model.fhir.{Condition, MedicationStatement, Observation, Patient}
 import org.json4s.DefaultFormats
+import srdc.smartcds.cds.flow.ACCAHAFlowExecution
+import srdc.smartcds.model.fhir.{Condition, MedicationStatement, Observation, Patient}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -25,7 +25,8 @@ class ACCAHAService(cdsServiceContext: CdsServiceContext) extends BaseCdsService
     val responseBuilder = createResponse(cdsServiceRequest)
 
     Future {
-      ACCAHAFlowExecution.executeFlow(patient, TotalCholesterol, HDL, BP_SBP, SmokingStatus, Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity, responseBuilder).cdsResponse
+      ACCAHAFlowExecution.executeFlow(patient, TotalCholesterol, HDL, BP_SBP, SmokingStatus, Type1Diabetes, Type2Diabetes,
+        HypertensiveTreatment, Ethnicity, responseBuilder).cdsResponse
     }
   }
 }
