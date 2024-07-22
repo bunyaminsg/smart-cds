@@ -193,7 +193,8 @@ object ACCAHAFlowExecution {
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
     println(s"Calculating ACC Risk for female with values: age=$age, totalCholesterol=$totalCholesterol," +
-      s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
+      s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes," +
+      s"treatedHypertension=$treatedHypertension, race=$race")
 
     val lnAge = log(age)
     val lnTotalCholesterol = log(totalCholesterol)
