@@ -82,7 +82,7 @@ object QRisk3FlowExecution {
     val b_type1 = checkExists(Type1Diabetes)
     val b_type2 = checkExists(Type2Diabetes)
     val bmiOpt = Try(BMI.head.valueQuantity.get.value.get).toOption
-    val bmi = if (bmiOpt.isDefined) { bmiOpt.get } else { 25 }
+    var bmi: Double = 0
     val fh_cvd = checkExists(CVD_FMH)
 
     val cholesterolObs = TotalCholesterol.headOption
@@ -136,7 +136,7 @@ object QRisk3FlowExecution {
     val sbp = if(sbpOpt.isEmpty) {125} else {sbpOpt.get}
     val sbpDeviation = sbpStdDeviation(BP_SBP)
 
-    val smoking = if (smokingObs.isDefined) {
+    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
       smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
     } else {Seq("266919005")}
     val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
@@ -146,24 +146,58 @@ object QRisk3FlowExecution {
     else if (smoking.contains("LA18981-3")) 4
     else 0
 
+    val maleIndicator: Boolean = patient.gender.contains("male")
     val surv = 10
     val town = 0
     val ethriskCode = Ethnicity.headOption.map(_.valueCodeableConcept.flatMap(_.coding.headOption.map(_.code)).getOrElse("0"))
     val ethrisk: Int = ethriskCode match {
-      case Some("0") => 1
-      case Some("1") => 2
-      case Some("2") => 3
-      case Some("3") => 4
-      case Some("4") => 5
-      case Some("5") => 6
-      case Some("6") => 7
-      case Some("7") => 8
-      case Some("8") => 9
-      case _ => 0
+      case Some("0") =>
+        if(maleIndicator){bmi = 27.1}
+        else{bmi = 27.5}
+        1
+      case Some("1") =>
+        if(maleIndicator){bmi = 25.3}
+        else{bmi = 26.6}
+        2
+      case Some("2") =>
+        if(maleIndicator){bmi = 26.2}
+        else{bmi = 28.3}
+        3
+      case Some("3") =>
+        if(maleIndicator){bmi = 24.9}
+        else{bmi = 27}
+        4
+      case Some("4") =>
+        if(maleIndicator){bmi = 25.4}
+        else{bmi = 25.8}
+        5
+      case Some("5") =>
+        if(maleIndicator){bmi = 26.7}
+        else{bmi = 29.1}
+        6
+      case Some("6") =>
+        if(maleIndicator){bmi = 26.3  }
+        else{bmi = 29.5}
+        7
+      case Some("7") =>
+        if(maleIndicator){bmi = 23.8}
+        else{bmi = 23.9}
+        8
+      case Some("8") =>
+        if(maleIndicator){bmi = 26.3}
+        else{bmi = 27.5}
+        9
+      case _ =>
+        if(maleIndicator){bmi = 27.1}
+        else{bmi = 27.5}
+        0
     }
 
+    if(bmiOpt.isDefined){bmi = bmiOpt.get}
 
-    if (patient.gender.contains("male")) {
+    println(s"Calculating QRisk3 Risk with values: age=$age,bmi=$bmi totalCholesterol=$cholesterol, hdlCholesterol=$hdl, sbp=$sbp, type1=$b_type1, treatedHypertension=$b_treatedhyp, race=$ethrisk, smoke_cat=$smoke_cat, sbp5=$sbpDeviation, fh_cvd=$fh_cvd, b_treatedhyp=$b_treatedhyp, atypical=$b_atypicalantipsy")
+
+    if (maleIndicator) {
       val patientScore = cvdMaleRaw(age, b_AF, b_atypicalantipsy, b_corticosteroids, b_impotence2, b_migraine, b_ra, b_renal, b_semi, b_sle, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpDeviation, smoke_cat, surv, town)
       val healthyScore = cvdMaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 4, 125, 0, 0, surv, town)
       Some(patientScore,healthyScore)
