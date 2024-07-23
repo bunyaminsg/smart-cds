@@ -57,7 +57,7 @@ object ACCAHAFlowExecution {
 
     val age = FhirParseHelper.getAge(patient)
     val gender = patient.gender
-    val race = determineRace(Ethnicity)
+    val raceOpt = Option(determineRace(Ethnicity))
     val diabetes = checkExists(Type1Diabetes) | checkExists(Type2Diabetes)
     val treatedHypertension = checkHypertensiveTreatment(HypertensiveTreatment)
 
@@ -86,11 +86,17 @@ object ACCAHAFlowExecution {
       return None
     }
 
+    if (raceOpt.isEmpty) {
+      println("Ethnicity not found")
+      return None
+    }
+
     val totalCholesterol = totalCholesterolOpt.get
     val hdlCholesterol = hdlCholesterolOpt.get
     val sbp = systolicBPOpt.get
+    val race = raceOpt.get
 
-    val smoking = if (smokingObs.isDefined) {
+    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
       smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
     } else {
       Seq("266919005")
