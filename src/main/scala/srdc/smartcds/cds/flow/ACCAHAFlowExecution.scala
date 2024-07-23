@@ -59,7 +59,7 @@ object ACCAHAFlowExecution {
     val gender = patient.gender
     val race = determineRace(Ethnicity)
     val diabetes = checkExists(Type1Diabetes) | checkExists(Type2Diabetes)
-    val treatedHypertension = checkExists(HypertensiveTreatment)
+    val treatedHypertension = checkHypertensiveTreatment(HypertensiveTreatment)
 
     val totalCholesterolOpt = Try(TotalCholesterol.head.valueQuantity.get.value.get).toOption
     val hdlCholesterolOpt = Try(HDLCholesterol.head.valueQuantity.get.value.get).toOption
@@ -117,6 +117,17 @@ object ACCAHAFlowExecution {
         println("Gender not specified or invalid")
         None
     }
+  }
+
+  private def checkHypertensiveTreatment(medications: Seq[MedicationStatement]): Int = {
+    val hypertensiveCodes = Set("C02", "C03", "C07", "C08", "C09")
+
+    val hasTreatment = medications.exists { medication =>
+      val medicationCodes = medication.medicationCodeableConcept.coding.map(_.code).toSeq
+      medicationCodes.exists(hypertensiveCodes.contains)
+    }
+
+    if (hasTreatment) 1 else 0
   }
 
   /**
