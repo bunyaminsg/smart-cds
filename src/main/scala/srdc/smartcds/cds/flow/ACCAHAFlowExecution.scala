@@ -257,8 +257,8 @@ object ACCAHAFlowExecution {
       coefLnAgeLnTotalCholesterol * lnAge * lnTotalCholesterol +
       coefLnHDLCholesterol * lnHDLCholesterol +
       coefLnAgeLnHDLCholesterol * lnAge * lnHDLCholesterol +
-      (if (treatedHypertension == 1) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
-      (if (treatedHypertension == 1) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
+      (if (treatedHypertension != 0) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
+      (if (treatedHypertension != 0) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
       coefLnAgeSmoker * lnAge * smoker +
       diabetesCoefficient
