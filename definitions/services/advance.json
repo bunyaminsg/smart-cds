@@ -6,7 +6,7 @@
   "prefetch": {
     "patient": "Patient/{{context.patientId}}",
     "AtrialFibrillation": "Condition?patient=Patient/{{context.patientId}}&code={{config.AtrialFibrillation}}&_count=1",
-    "DiabeticRetinopathy": "Condition?patient=Patient/{{context.patientId}}&code={{config.DiabeticRetinopathy}}&_count=1",
+    "Retinopathy": "Condition?patient=Patient/{{context.patientId}}&code={{config.Retinopathy}}&_count=1",
     "HypertensiveTreatment": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.HypertensiveTreatment}}&_count=1",
     "HbA1C": "Observation?patient=Patient/{{context.patientId}}&code={{config.HbA1C}}&_sort=-date&_count=1",
     "ACR": "Observation?patient=Patient/{{context.patientId}}&code={{config.ACR}}&_sort=-date&_count=1",

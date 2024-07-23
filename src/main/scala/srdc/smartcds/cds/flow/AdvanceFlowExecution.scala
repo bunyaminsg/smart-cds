@@ -13,7 +13,7 @@ object AdvanceFlowExecution {
    *
    * @param patient Patient resource
    * @param AtrialFibrillation Atrial Fibrillation Condition
-   * @param DiabeticRetinopathy Diabetic Retinopathy Condition
+   * @param Retinopathy Diabetic Retinopathy Condition
    * @param HypertensiveTreatment Hypertensive Treatment Medication
    * @param HbA1C HbA1C Observation
    * @param ACR Albumin/Creatine Ratio Observation
@@ -27,7 +27,7 @@ object AdvanceFlowExecution {
    * @param responseBuilder Response Builder
    * @return
    */
-  def executionFlow(patient: Patient, AtrialFibrillation: Seq[Condition],DiabeticRetinopathy: Seq[Observation], HypertensiveTreatment: Seq[MedicationStatement],
+  def executionFlow(patient: Patient, AtrialFibrillation: Seq[Condition],Retinopathy: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
                     HbA1C: Seq[Observation], ACR: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], NonHDL: Seq[Observation],
                     BP_SBP: Seq[Observation], BP_DBP: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
     val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
@@ -68,7 +68,7 @@ object AdvanceFlowExecution {
 
     val b_AF = checkExists(AtrialFibrillation)
     val b_treatedhyp = checkExists(HypertensiveTreatment)
-    val b_DR = checkExists(DiabeticRetinopathy)
+    val b_R = checkExists(Retinopathy)
 
 
     var diabetes_duration = -1
@@ -136,7 +136,7 @@ object AdvanceFlowExecution {
     } else if(pulse_p >= 50) {
       sum += 1
     }
-    if(b_DR == 1) {sum += 1}
+    if(b_R == 1) {sum += 1}
     if(b_treatedhyp == 1) {sum += 1}
     if(b_AF == 1) {sum += 2}
     if(hba1c >= 9) {

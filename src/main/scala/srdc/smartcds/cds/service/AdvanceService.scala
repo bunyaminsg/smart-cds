@@ -14,7 +14,7 @@ class AdvanceService(cdsServiceContext: CdsServiceContext) extends BaseCdsServic
   override def executeCds(cdsServiceRequest: CdsServiceRequest)(implicit ex: ExecutionContext): Future[CdsResponse] = {
     val patient = cdsServiceRequest.prefetches.get("patient").head.head.extract[Patient]
     val AtrialFibrillation = cdsServiceRequest.prefetches.get("AtrialFibrillation").head.map(res => res.extract[Condition])
-    val DiabeticRetinopathy = cdsServiceRequest.prefetches.get("DiabeticRetinopathy").head.map(res => res.extract[Observation])
+    val Retinopathy = cdsServiceRequest.prefetches.get("Retinopathy").head.map(res => res.extract[Condition])
     val HypertensiveTreatment = cdsServiceRequest.prefetches.get("HypertensiveTreatment").head.map(res => res.extract[MedicationStatement])
     val HbA1C = cdsServiceRequest.prefetches.get("HbA1C").head.map(res => res.extract[Observation])
     val ACR = cdsServiceRequest.prefetches.get("ACR").head.map(res => res.extract[Observation])
@@ -28,7 +28,7 @@ class AdvanceService(cdsServiceContext: CdsServiceContext) extends BaseCdsServic
 
     val responseBuilder = createResponse(cdsServiceRequest)
     Future{
-      AdvanceFlowExecution.executionFlow(patient, AtrialFibrillation, DiabeticRetinopathy, HypertensiveTreatment,
+      AdvanceFlowExecution.executionFlow(patient, AtrialFibrillation, Retinopathy, HypertensiveTreatment,
         HbA1C, ACR, TotalCholesterol, HDL, NonHDL, BP_SBP, BP_DBP, Type1Diabetes, Type2Diabetes,  responseBuilder).cdsResponse
     }
   }

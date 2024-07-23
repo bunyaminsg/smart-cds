@@ -5,9 +5,13 @@
       "resourceType": "Condition",
       "type": "boolean"
     },
-    "DiabeticRetinopathy": {
+    "Retinopathy": {
       "resourceType": "Condition",
-      "type": "boolean"
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "Retinopathy"
+      }
     },
     "HypertensiveTreatment": {
       "resourceType": "MedicationStatement",
