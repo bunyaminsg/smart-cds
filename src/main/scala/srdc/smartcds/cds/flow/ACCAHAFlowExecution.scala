@@ -125,6 +125,9 @@ object ACCAHAFlowExecution {
     }
   }
 
+  /**
+   * Determines whether patient has Hypertensive Treatment or not
+   */
   private def checkHypertensiveTreatment(medications: Seq[MedicationStatement]): Int = {
     val hypertensiveCodes = Set("C02", "C03", "C07", "C08", "C09")
 
