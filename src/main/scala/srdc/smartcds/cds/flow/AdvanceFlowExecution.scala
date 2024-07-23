@@ -13,7 +13,7 @@ object AdvanceFlowExecution {
    *
    * @param patient Patient resource
    * @param AtrialFibrillation Atrial Fibrillation Condition
-   * @param Retinopathy Diabetic Retinopathy Condition
+   * @param Retinopathy Retinopathy Condition
    * @param HypertensiveTreatment Hypertensive Treatment Medication
    * @param HbA1C HbA1C Observation
    * @param ACR Albumin/Creatine Ratio Observation
@@ -42,20 +42,29 @@ object AdvanceFlowExecution {
       val nonhdlObs = NonHDL.headOption
       nonhdl = FhirParseHelper.getQuantityObservationValue(nonhdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
     } else if(checkExists(HDL)==1 && checkExists(TotalCholesterol) == 1){
-      val hdlObs = HDL.headOption
-      val cholesterolObs = TotalCholesterol.headOption
-      val cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-      val hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+      var hdl= 0.0
+      if(checkExists(HDL)==1){
+        val hdlObs = HDL.headOption
+        hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+      } else {
+        hdl = 1.6
+      }
+      var cholesterol = 0.0
+      if(checkExists(TotalCholesterol) == 1){
+        val cholesterolObs = TotalCholesterol.headOption
+        cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+      } else {
+        cholesterol = 5.17
+      }
+
       nonhdl = cholesterol - hdl
-    } else {
-      nonhdl = 3.5
     }
 
     var acr = 0.0
     if(checkExists(ACR) == 1){
       val acrObs = ACR.headOption
       acr = FhirParseHelper.getQuantityObservationValue(acrObs, Option(UnitConceptEnum.ACR)).get
-    } else {acr = 20.0}
+    } else {acr = 2.0}
 
     var hba1c = 0.0
     if(checkExists(HbA1C) == 1){
@@ -151,9 +160,9 @@ object AdvanceFlowExecution {
     } else if(nonhdl >= 3){
       sum += 1
     }
-    if(acr>300) {
+    if(acr>30) {
       sum += 3
-    } else if(acr >= 30){
+    } else if(acr >= 3){
       sum +=2
     }
 
