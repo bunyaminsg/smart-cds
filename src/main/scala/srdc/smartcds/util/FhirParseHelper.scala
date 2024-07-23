@@ -105,5 +105,20 @@ object FhirParseHelper {
       FhirParseHelper.getQuantityObservationValue(sbpObs, None)
     }
   }
+  def getDiastolicBP(BP_DBP: Seq[Observation]) = {
+    val dbpObs = FhirParseHelper.findLatestObservation(ValueSetUtil.getConceptSystemAndCode(ConceptIdUtil.DIASTOLIC_BP), BP_DBP)
+    val bpObs = FhirParseHelper.findLatestObservation(ValueSetUtil.getConceptSystemAndCode(ConceptIdUtil.BP), BP_DBP)
+    if ((dbpObs.isEmpty || !checkObservationValuesExist(List(dbpObs))) && bpObs.nonEmpty) {
+      val dbpComp = bpObs.get.component.flatMap(_.find(comp =>
+        FhirParseHelper.checkCodingMatch(comp.code, ValueSetUtil.getConceptSystemAndCode(ConceptIdUtil.DIASTOLIC_BP), startsWith = true)))
+      if (dbpComp.nonEmpty && dbpComp.get.valueQuantity.flatMap(_.value).nonEmpty) {
+        dbpComp.get.valueQuantity.get.value
+      } else {
+        None
+      }
+    } else {
+      FhirParseHelper.getQuantityObservationValue(dbpObs, None)
+    }
+  }
 
 }
