@@ -7,7 +7,7 @@ import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper}
 import scala.math.{exp, log, pow}
 import scala.util.Try
 
-//noinspection ScalaDocMissingParameterDescription,DuplicatedCode
+//noinspection DuplicatedCode
 object ACCAHAFlowExecution {
 
   /**
