@@ -121,6 +121,12 @@ object QRisk3FlowExecution {
     }
 
     val smokingObs = SmokingStatus.headOption
+    val ethnicityObs = Ethnicity.headOption
+
+    if (!FhirParseHelper.checkObservationValuesExist(List(smokingObs, ethnicityObs))) {
+      println("Please Enter Smoking Status and Ethnicity!")
+      return None
+    }
 
     var rati: Double = 4
 
