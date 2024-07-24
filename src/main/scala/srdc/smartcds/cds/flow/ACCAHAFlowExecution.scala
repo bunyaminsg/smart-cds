@@ -66,23 +66,8 @@ object ACCAHAFlowExecution {
     val systolicBPOpt = FhirParseHelper.getSystolicBP(SystolicBP)
     val smokingObs = SmokingStatus.headOption
 
-    if (totalCholesterolOpt.isEmpty) {
-      println("Total Cholesterol not found")
-      return None
-    }
-
-    if (hdlCholesterolOpt.isEmpty) {
-      println("HDL not found")
-      return None
-    }
-
-    if (systolicBPOpt.isEmpty) {
-      println("SBP not found")
-      return None
-    }
-
-    if (smokingObs.isEmpty) {
-      println("smoking not found")
+    if (totalCholesterolOpt.isEmpty || hdlCholesterolOpt.isEmpty || systolicBPOpt.isEmpty || smokingObs.isEmpty) {
+      println("Missing required data for ACC/AHA Risk Score calculation.")
       return None
     }
 
