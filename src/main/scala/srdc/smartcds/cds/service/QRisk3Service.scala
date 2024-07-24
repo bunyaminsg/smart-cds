@@ -11,7 +11,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class QRisk3Service(cdsServiceContext: CdsServiceContext) extends BaseCdsService(cdsServiceContext) {
   implicit val formats: DefaultFormats.type = DefaultFormats
 
+  /**
+   *
+   * @param cdsServiceRequest An instance of CdsServiceRequest that enables fetching the patient's inputs
+   * @return A Future that represents the result of asynchronous computation of Risk score of patient and a healthy person
+   */
   override def executeCds(cdsServiceRequest: CdsServiceRequest)(implicit ex: ExecutionContext): Future[CdsResponse] = {
+    /**
+     * Prefetching the patient' s inputs to use in calculating the risk scores
+     */
     val patient = cdsServiceRequest.prefetches.get("patient").head.head.extract[Patient]
     val AtrialFibrillation = cdsServiceRequest.prefetches.get("AtrialFibrillation").head.map(res => res.extract[Condition])
     val RheumatoidArthritis = cdsServiceRequest.prefetches.get("RheumatoidArthritis").head.map(res => res.extract[Condition])
@@ -36,6 +44,9 @@ class QRisk3Service(cdsServiceContext: CdsServiceContext) extends BaseCdsService
     val responseBuilder = createResponse(cdsServiceRequest)
 
     Future {
+      /**
+       * Calling the executeFlow function from QRisk3FlowExecution with the inputs prefetched to calculate the risk scores
+       */
       QRisk3FlowExecution.executeFlow(patient, AtrialFibrillation, RheumatoidArthritis, CKD3_4_5, Type1Diabetes, Type2Diabetes,
         HypertensiveTreatment, BMI, TotalCholesterol, HDL, BP_SBP, SmokingStatus, CVD_FMH, Corticosteroids, Antipsychotics,
         Ethnicity, SystemicLupusErythematosus, SevereMentalIllness, ErectileDysfunction, Migraine, responseBuilder).cdsResponse
