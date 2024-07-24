@@ -26,32 +26,28 @@
       "type": "Quantity",
       "unit": "%",
       "min": 0,
-      "max": 999,
-      "required": true
+      "max": 999
     },
     "ACR": {
       "resourceType": "Observation",
       "type": "Quantity",
       "unit": "mg/mmol",
       "min": 0,
-      "max": 999,
-      "required": true
+      "max": 999
     },
     "TotalCholesterol": {
       "resourceType": "Observation",
       "type": "Quantity",
       "unit": "mmol/l",
       "min": 0,
-      "max": 999,
-      "required": true
+      "max": 999
     },
     "HDL": {
       "resourceType": "Observation",
       "type": "Quantity",
       "unit": "mmol/l",
       "min": 0,
-      "max": 999,
-      "required": true
+      "max": 999
     },
 
     "NonHDL": {
@@ -59,8 +55,7 @@
       "type": "Quantity",
       "unit": "mmol/l",
       "min": 0,
-      "max": 999,
-      "required": true
+      "max": 999
     },
 
     "BP_SBP": {
@@ -69,8 +64,7 @@
       "unit": "mm[Hg]",
       "min": 0,
       "max": 999,
-      "conceptId": "SystolicBP",
-      "required": true
+      "conceptId": "SystolicBP"
     },
     "BP_DBP": {
       "resourceType": "Observation",
@@ -78,8 +72,7 @@
       "unit": "mm[Hg]",
       "min": 0,
       "max": 999,
-      "conceptId": "DiastolicBP",
-      "required": true
+      "conceptId": "DiastolicBP"
     },
 
 
