@@ -50,11 +50,25 @@ object ACCAHAFlowExecution {
 
   /**
    * Checks whether the needed resource is present or not
+   *
+   * @param resources Resource to check the state of
    */
   def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
 
   /**
    * Validates given prefetch and returns the ACC/AHA risk score
+   *
+   * @param patient               Patient resource
+   * @param TotalCholesterol      Total Cholesterol Observation
+   * @param HDLCholesterol        HDL Observation
+   * @param SystolicBP            Blood Pressure Observation
+   * @param SmokingStatus         Smoking Status Observation
+   * @param Type1Diabetes         Type 1 Diabetes Condition
+   * @param Type2Diabetes         Type 2 Diabetes Condition
+   * @param HypertensiveTreatment Hypertensive Treatment Medication Statement
+   * @param Ethnicity             Ethnicity Observation for Patient
+   * @return A double tuple consisting of patient's risk score and healthy score of a hypothetical
+   *         patient with same age, sex, gender, but with optimal health parameters
    */
   private def calculateACCRisk(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
                                SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition],
@@ -102,6 +116,8 @@ object ACCAHAFlowExecution {
 
   /**
    * Determines whether patient has Hypertensive Treatment or not
+   *
+   * @param medications sequence of patient's Medication Statements
    */
   private def checkHypertensiveTreatment(medications: Seq[MedicationStatement]): Int = {
     val hypertensiveCodes = Set("C02", "C03", "C07", "C08", "C09")
@@ -116,6 +132,9 @@ object ACCAHAFlowExecution {
 
   /**
    * Determines the race of the patient based on Ethnicity observation
+   *
+   * @param ethnicity sequence of Ethnicity observations for patient
+   *                  Can be further optimized since ethnicity doesn't change
    */
   private def determineRace(ethnicity: Seq[Observation]): String = {
     val blackEthnicityCodes = Seq("LA6162-7")
@@ -127,6 +146,8 @@ object ACCAHAFlowExecution {
 
   /**
    * Determines the smoking status of the patient
+   *
+   * @param smokingObs patient's smoking status
    */
   //noinspection DuplicatedCode
   private def determineSmokingStatus(smokingObs: Option[Observation]): Int = {
@@ -148,6 +169,15 @@ object ACCAHAFlowExecution {
 
   /**
    * Calculate ACC/AHA risk score for male patients
+   *
+   * @param age                 age of patient
+   * @param totalCholesterol    total cholesterol of the patient
+   * @param hdlCholesterol      total HDL (High-Density Lipoprotein) cholesterol of the patient
+   * @param sbp                 systolic blood pressure of the patient
+   * @param smoker              whether patient is an active smoker or not
+   * @param diabetes            whether patient has diabetes or not (does NOT care about type of diabetes)
+   * @param treatedHypertension whether patient is under treatment related to Hypertension
+   * @param race                race of the patient, either "africanamerican" or "white", as per the source paper
    */
   private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
@@ -218,6 +248,15 @@ object ACCAHAFlowExecution {
 
   /**
    * Calculate ACC/AHA risk score for female patients
+   *
+   * @param age                 age of patient
+   * @param totalCholesterol    total cholesterol of the patient
+   * @param hdlCholesterol      total HDL (High-Density Lipoprotein) cholesterol of the patient
+   * @param sbp                 systolic blood pressure of the patient
+   * @param smoker              whether patient is an active smoker or not
+   * @param diabetes            whether patient has diabetes or not (does NOT care about type of diabetes)
+   * @param treatedHypertension whether patient is under treatment related to Hypertension
+   * @param race                race of the patient, either "africanamerican" or "white", as per the source paper
    */
   private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
