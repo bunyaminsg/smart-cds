@@ -7,7 +7,7 @@ import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper}
 import scala.math.{exp, log, pow}
 import scala.util.Try
 
-//noinspection ScalaDocMissingParameterDescription
+//noinspection ScalaDocMissingParameterDescription,DuplicatedCode
 object ACCAHAFlowExecution {
 
   /**
@@ -83,20 +83,7 @@ object ACCAHAFlowExecution {
     val sbp = systolicBPOpt.get
     val race = raceOpt.get
 
-    /* Handle patient's smoking status */
-    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
-      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
-    } else {
-      Seq("266919005")
-    }
-    val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
-    else if (smoking.contains("LA15920-4", "8517006")) 1
-    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
-    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
-    else if (smoking.contains("LA18981-3")) 4
-    else 0
-
-    val smoker = if (smoke_cat == 0 | smoke_cat == 1) 0 else 1 /* Treat "never smoked" and "former smoker" as 0, others as 1 */
+    val smoker = determineSmokingStatus(smokingObs)
 
     gender match {
       case Some("male") =>
@@ -136,6 +123,27 @@ object ACCAHAFlowExecution {
     val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
 
     if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white" /* Paper only cares whether the patient is black or not, so did I */
+  }
+
+  /**
+   * Determines the smoking status of the patient
+   */
+  //noinspection DuplicatedCode
+  private def determineSmokingStatus(smokingObs: Option[Observation]): Int = {
+    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
+      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
+    } else {
+      Seq("266919005")
+    }
+
+    val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
+    else if (smoking.contains("LA15920-4", "8517006")) 1
+    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
+    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
+    else if (smoking.contains("LA18981-3")) 4
+    else 0
+
+    if (smoke_cat == 0 || smoke_cat == 1) 0 else 1 /* Treat "never smoked" and "former smoker" as 0, others as 1 */
   }
 
   /**
