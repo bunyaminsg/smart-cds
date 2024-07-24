@@ -58,6 +58,7 @@ object ACCAHAFlowExecution {
     val age = FhirParseHelper.getAge(patient)
     val gender = patient.gender
     val raceOpt = Option(determineRace(Ethnicity))
+    val raceObs = Ethnicity.headOption
     val diabetes = checkExists(Type1Diabetes) | checkExists(Type2Diabetes)
     val treatedHypertension = checkHypertensiveTreatment(HypertensiveTreatment)
 
@@ -66,7 +67,7 @@ object ACCAHAFlowExecution {
     val systolicBPOpt = FhirParseHelper.getSystolicBP(SystolicBP)
     val smokingObs = SmokingStatus.headOption
 
-    if (totalCholesterolOpt.isEmpty || hdlCholesterolOpt.isEmpty || systolicBPOpt.isEmpty || smokingObs.isEmpty) {
+    if (totalCholesterolOpt.isEmpty || hdlCholesterolOpt.isEmpty || systolicBPOpt.isEmpty || !FhirParseHelper.checkObservationValuesExist(List(smokingObs, raceObs))) {
       println("Missing required data for ACC/AHA Risk Score calculation.")
       return None
     }
