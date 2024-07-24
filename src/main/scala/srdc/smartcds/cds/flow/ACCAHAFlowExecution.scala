@@ -13,17 +13,17 @@ object ACCAHAFlowExecution {
   /**
    * Executes ACC/AHA calculation service
    *
-   * @param patient
-   * @param TotalCholesterol
-   * @param HDLCholesterol
-   * @param SystolicBP
-   * @param SmokingStatus
-   * @param Type1Diabetes
-   * @param Type2Diabetes
-   * @param HypertensiveTreatment
-   * @param Ethnicity
-   * @param responseBuilder
-   * @return
+   * @param patient               Patient resource
+   * @param TotalCholesterol      Total Cholesterol Observation
+   * @param HDLCholesterol        HDL Observation
+   * @param SystolicBP            Blood Pressure Observation
+   * @param SmokingStatus         Smoking Status Observation
+   * @param Type1Diabetes         Type 1 Diabetes Condition
+   * @param Type2Diabetes         Type 2 Diabetes Condition
+   * @param HypertensiveTreatment Hypertensive Treatment Medication Statement
+   * @param Ethnicity             Ethnicity Observation for Patient
+   * @param responseBuilder       Response Builder
+   * @return if applicable, returns the related ACC/AHA Score Card as a pair, for patient and for healthy person of same gender, race and sex; else 'no-value'
    */
   def executeFlow(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
                   SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition],
@@ -31,7 +31,8 @@ object ACCAHAFlowExecution {
                   responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
 
     var output = responseBuilder
-    val riskScores = calculateACCRisk(patient, TotalCholesterol, HDLCholesterol, SystolicBP, SmokingStatus, Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity)
+    val riskScores = calculateACCRisk(patient, TotalCholesterol, HDLCholesterol, SystolicBP, SmokingStatus,
+      Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity)
 
     riskScores match {
       case Some((patientScore, healthyScore)) =>
@@ -48,13 +49,18 @@ object ACCAHAFlowExecution {
   }
 
   /**
+   * Checks whether the needed resource is present or not
+   */
+  def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
+
+  /**
    * Validates given prefetch and returns the ACC/AHA risk score
    */
   private def calculateACCRisk(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
                                SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition],
                                HypertensiveTreatment: Seq[MedicationStatement], Ethnicity: Seq[Observation]): Option[(Double, Double)] = {
-    def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
 
+    /* Get related information about the patient */
     val age = FhirParseHelper.getAge(patient)
     val gender = patient.gender
     val raceOpt = Option(determineRace(Ethnicity))
@@ -77,6 +83,7 @@ object ACCAHAFlowExecution {
     val sbp = systolicBPOpt.get
     val race = raceOpt.get
 
+    /* Handle patient's smoking status */
     val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
       smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
     } else {
@@ -89,16 +96,16 @@ object ACCAHAFlowExecution {
     else if (smoking.contains("LA18981-3")) 4
     else 0
 
-    val smoker = if (smoke_cat == 0 | smoke_cat == 1) 0 else 1
+    val smoker = if (smoke_cat == 0 | smoke_cat == 1) 0 else 1 /* Treat "never smoked" and "former smoker" as 0, others as 1 */
 
     gender match {
       case Some("male") =>
         val patientScore = calculateACCRiskM(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race)
-        val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, race)
+        val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, race) /* Ideal parameters for male patients */
         Some(patientScore, healthyScore)
       case Some("female") =>
         val patientScore = calculateACCRiskF(age, totalCholesterol, hdlCholesterol, sbp, smoker, diabetes, treatedHypertension, race)
-        val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, race)
+        val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, race) /* Ideal parameters for female patients */
         Some(patientScore, healthyScore)
       case _ =>
         println("Gender not specified or invalid")
@@ -124,10 +131,11 @@ object ACCAHAFlowExecution {
    * Determines the race of the patient based on Ethnicity observation
    */
   private def determineRace(ethnicity: Seq[Observation]): String = {
-    val blackEthnicityCodes = Seq("LA6162-7") // Black or African-American LOINC code
+    val blackEthnicityCodes = Seq("LA6162-7")
+    /* Black or African-American LOINC code */
     val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
 
-    if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white"
+    if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white" /* Paper only cares whether the patient is black or not, so did I */
   }
 
   /**
@@ -136,6 +144,7 @@ object ACCAHAFlowExecution {
   private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
+    /* Log patient params for easier debugging */
     println(s"Calculating ACC Risk for male with values: age=$age, totalCholesterol=$totalCholesterol," +
       s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
 
@@ -148,41 +157,42 @@ object ACCAHAFlowExecution {
     coefLnAgeLnHDLCholesterol, coefLnTreatedSBP, coefLnAgeLnTreatedSBP, coefLnUntreatedSBP, coefLnAgeLnUntreatedSBP,
     smokerCoefficient, coefLnAgeSmoker, diabetesCoefficient, baselineSurvival, mean) = race match {
       case "africanamerican" => (
-        2.469, // lnAge
-        0.0, // lnAgeSquared
-        0.302, // lnTotalCholesterol
-        0.0, // lnAge * lnTotalCholesterol
-        -0.307, // lnHDLCholesterol
-        0.0, // lnAge * lnHDLCholesterol
-        1.916, // lnTreatedSBP
-        0.0, // lnAge * lnTreatedSBP
-        1.809, // lnUntreatedSBP
-        0.0, // lnAge * lnUntreatedSBP
-        if (smoker == 1) 0.549 else 0.0, // smoker
-        0.0, // lnAge * smoker
+        2.469, /* lnAge */
+        0.0, /* lnAgeSquared */
+        0.302, /* lnTotalCholesterol */
+        0.0, /* lnAge * lnTotalCholesterol */
+        -0.307, /* lnHDLCholesterol */
+        0.0, /* lnAge * lnHDLCholesterol */
+        1.916, /* lnTreatedSBP */
+        0.0, /* lnAge * lnTreatedSBP */
+        1.809, /* lnUntreatedSBP */
+        0.0, /* lnAge * lnUntreatedSBP */
+        if (smoker == 1) 0.549 else 0.0, /* smoker */
+        0.0, /* lnAge * smoker */
         if (diabetes == 1) 0.645 else 0.0, // diabetes
-        0.8954, // baselineSurvival
-        19.54 // mean
+        0.8954, /* baselineSurvival */
+        19.54 /* mean */
       )
       case _ => (
-        12.344, // lnAge
-        0.0, // lnAgeSquared
-        11.853, // lnTotalCholesterol
-        -2.664, // lnAge * lnTotalCholesterol
-        -7.990, // lnHDLCholesterol
-        1.769, // lnAge * lnHDLCholesterol
-        1.797, // lnTreatedSBP
-        0.0, // lnAge * lnTreatedSBP
-        1.764, // lnUntreatedSBP
-        0.0, // lnAge * lnUntreatedSBP
+        12.344, /* lnAge */
+        0.0, /* lnAgeSquared */
+        11.853, /* lnTotalCholesterol */
+        -2.664, /* lnAge * lnTotalCholesterol */
+        -7.990, /* lnHDLCholesterol */
+        1.769, /* lnAge * lnHDLCholesterol */
+        1.797, /* lnTreatedSBP */
+        0.0, /* lnAge * lnTreatedSBP */
+        1.764, /* lnUntreatedSBP */
+        0.0, /* lnAge * lnUntreatedSBP */
         if (smoker == 1) 7.837 else 0.0, // smoker
-        -1.795, // lnAge * smoker
+        -1.795, /* lnAge * smoker */
         if (diabetes == 1) 0.658 else 0.0, // diabetes
-        0.9144, // baselineSurvival
-        61.18 // mean
+        0.9144, /* baselineSurvival */
+        61.18 /* mean */
       )
     }
 
+    /* Sum the values with respect to the table in the paper */
     val lnSum = coefLnAge * lnAge +
       coefLnAgeSquared * pow(lnAge, 2) +
       coefLnTotalCholesterol * lnTotalCholesterol +
@@ -204,6 +214,7 @@ object ACCAHAFlowExecution {
   private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
 
+    /* Log patient params for easier debugging */
     println(s"Calculating ACC Risk for female with values: age=$age, totalCholesterol=$totalCholesterol," +
       s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes," +
       s"treatedHypertension=$treatedHypertension, race=$race")
@@ -217,41 +228,42 @@ object ACCAHAFlowExecution {
     coefLnAgeLnHDLCholesterol, coefLnTreatedSBP, coefLnAgeLnTreatedSBP, coefLnUntreatedSBP, coefLnAgeLnUntreatedSBP,
     smokerCoefficient, coefLnAgeSmoker, diabetesCoefficient, baselineSurvival, mean) = race match {
       case "africanamerican" => (
-        17.114, // lnAge
-        0.0, // lnAgeSquared
-        0.940, // lnTotalCholesterol
-        0.0, // lnAge * lnTotalCholesterol
-        -18.920, // lnHDLCholesterol
-        4.475, // lnAge * lnHDLCholesterol
-        29.291, // lnTreatedSBP
-        -6.432, // lnAge * lnTreatedSBP
-        27.820, // lnUntreatedSBP
-        -6.087, // lnAge * lnUntreatedSBP
-        if (smoker == 1) 0.691 else 0.0, // smoker
-        0.0, // lnAge * smoker
-        if (diabetes == 1) 0.874 else 0.0, // diabetes
-        0.9533, // baselineSurvival
-        86.61 // mean
+        17.114, /* lnAge */
+        0.0, /* lnAgeSquared */
+        0.940, /* lnTotalCholesterol */
+        0.0, /* lnAge * lnTotalCholesterol */
+        -18.920, /* lnHDLCholesterol */
+        4.475, /* lnAge * lnHDLCholesterol */
+        29.291, /* lnTreatedSBP */
+        -6.432, /* lnAge * lnTreatedSBP */
+        27.820, /* lnUntreatedSBP */
+        -6.087, /* lnAge * lnUntreatedSBP */
+        if (smoker == 1) 0.691 else 0.0, /* smoker */
+        0.0, /* lnAge * smoker */
+        if (diabetes == 1) 0.874 else 0.0, /* diabetes */
+        0.9533, /* baselineSurvival */
+        86.61 /* mean */
       )
       case _ => (
-        -29.799, // lnAge
-        4.884, // lnAgeSquared
-        13.540, // lnTotalCholesterol
-        -3.114, // lnAge * lnTotalCholesterol
-        -13.578, // lnHDLCholesterol
-        3.149, // lnAge * lnHDLCholesterol
-        2.019, // lnTreatedSBP
-        0.0, // lnAge * lnTreatedSBP
-        1.957, // lnUntreatedSBP
-        0.0, // lnAge * lnUntreatedSBP
-        if (smoker == 1) 7.574 else 0.0, // smoker
-        -1.665, // lnAge * smoker
-        if (diabetes == 1) 0.661 else 0.0, // diabetes
-        0.9665, // baselineSurvival
-        -29.18 // mean
+        -29.799, /* lnAge */
+        4.884, /* lnAgeSquared */
+        13.540, /* lnTotalCholesterol */
+        -3.114, /* lnAge * lnTotalCholesterol */
+        -13.578, /* lnHDLCholesterol */
+        3.149, /* lnAge * lnHDLCholesterol */
+        2.019, /* lnTreatedSBP */
+        0.0, /* lnAge * lnTreatedSBP */
+        1.957, /* lnUntreatedSBP */
+        0.0, /* lnAge * lnUntreatedSBP */
+        if (smoker == 1) 7.574 else 0.0, /* smoker */
+        -1.665, /* lnAge * smoker */
+        if (diabetes == 1) 0.661 else 0.0, /* diabetes */
+        0.9665, /* baselineSurvival */
+        -29.18 /* mean */
       )
     }
 
+    /* Sum the values with respect to the table in the paper */
     val lnSum = coefLnAge * lnAge +
       coefLnAgeSquared * pow(lnAge, 2) +
       coefLnTotalCholesterol * lnTotalCholesterol +
