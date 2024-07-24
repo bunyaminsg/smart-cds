@@ -86,11 +86,6 @@ object ACCAHAFlowExecution {
       return None
     }
 
-    if (raceOpt.isEmpty) {
-      println("Ethnicity not found")
-      return None
-    }
-
     val totalCholesterol = totalCholesterolOpt.get
     val hdlCholesterol = hdlCholesterolOpt.get
     val sbp = systolicBPOpt.get
