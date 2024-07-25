@@ -1,16 +1,16 @@
 {
-  "uuid": "CVD CARD SCORE",
-  "summary": "ADVANCE Risk SCORE",
+  "uuid": "ADVANCE REDUCE ACR",
+  "summary": "Control Albumin/Creatine Ratio",
   "indicator": "no-show",
-  "detail": "",
+  "detail": "Control Albumin/Creatine Ratio (ACR = 2 mg/mmol)",
   "source": {
     "label": "",
     "url": ""
   },
   "suggestions": [
     {
-      "label": "ADVANCE Risk Score",
-      "uuid": "Suggestion 1",
+      "label": "Control Albumin/Creatine Ratio (ACR = 2 mg/mmol)",
+      "uuid": "suggestion-reduce-bp",
       "actions": [
         {
           "type": "create",
@@ -25,25 +25,18 @@
             "code": {
               "coding": [
                 {
-                  "system": "http://snomed.info/sct",
-                  "code": "advance-risk",
-                  "display": "ADVANCE Risk Score"
+                  "system": "http://loinc.org",
+                  "code": "32294-1",
+                  "display": "Albumin/Creatinine [Ratio] in Urine"
                 }
               ]
             },
             "valueQuantity": {
-              "value": {{scoreValue}},
-              "unit": "%",
+              "value": 2,
+              "unit": "mg/mmol",
               "system": "http://unitsofmeasure.org",
-              "code": "%"
-            },
-            "referenceRange": [
-              {
-                "high": {
-                  "value": {{healthyValue}}
-                }
-              }
-            ]
+              "code": "mg/mmol"
+            }
           }
         }
       ]

@@ -1,16 +1,16 @@
 {
-  "uuid": "CVD CARD SCORE",
-  "summary": "ADVANCE Risk SCORE",
+  "uuid": "ADVANCE REDUCE HBA1C",
+  "summary": "Control HbA1C",
   "indicator": "no-show",
-  "detail": "",
+  "detail": "Control HbA1C (HbA1C = 5.7%)",
   "source": {
     "label": "",
     "url": ""
   },
   "suggestions": [
     {
-      "label": "ADVANCE Risk Score",
-      "uuid": "Suggestion 1",
+      "label": "Control HbA1C (HbA1C = 5.7%)",
+      "uuid": "suggestion-reduce-bp",
       "actions": [
         {
           "type": "create",
@@ -25,25 +25,18 @@
             "code": {
               "coding": [
                 {
-                  "system": "http://snomed.info/sct",
-                  "code": "advance-risk",
-                  "display": "ADVANCE Risk Score"
+                  "system": "http://loinc.org",
+                  "code": "4548-4",
+                  "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
                 }
               ]
             },
             "valueQuantity": {
-              "value": {{scoreValue}},
+              "value": 5.7,
               "unit": "%",
               "system": "http://unitsofmeasure.org",
               "code": "%"
-            },
-            "referenceRange": [
-              {
-                "high": {
-                  "value": {{healthyValue}}
-                }
-              }
-            ]
+            }
           }
         }
       ]
