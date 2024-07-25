@@ -58,6 +58,8 @@ object QRisk3FlowExecution {
       output = recommendStopSmokingIfApplicable(SmokingStatus, output)
       output = recommendReduceBPIfApplicable(BP_SBP, output)
       output = recommendReduceBMIIfApplicable(BMI, output)
+      output = recommendReduceTotalCholesterolIfApplicable(TotalCholesterol, output)
+      output = recommendIncreaseHDLIfApplicable(HDL, output)
     }
     output
   }
@@ -89,6 +91,42 @@ object QRisk3FlowExecution {
     val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
     if(sbpOpt.isDefined && sbpOpt.get > 140){
       output.withCard(_.loadCardWithPostTranslation("card-reduce-bp",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  /**
+   *
+   * @param TotalCholesterol Total Cholesterol of the Patient
+   * @param output CdsResponseBuilder with the suggestion to lower the Total Cholesterol If TotalCholesterol is known and it is bigger than the healthy TotalCholesterol value
+   * @return
+   */
+  private def recommendReduceTotalCholesterolIfApplicable(TotalCholesterol: Seq[Observation], output: CdsResponseBuilder) = {
+    val cholesterolObs = TotalCholesterol.headOption
+    if(FhirParseHelper.checkObservationValuesExist(List(cholesterolObs)) &&
+      FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get > 6.21){
+      output.withCard(_.loadCardWithPostTranslation("card-reduce-cholesterol",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  /**
+   *
+   * @param HDL HDL Cholesterol value of the Patient
+   * @param output CdsResponseBuilder with the suggestion to increse HDL If HDL is known and it is smaller than the healthy HDL value
+   * @return
+   */
+  private def recommendIncreaseHDLIfApplicable(HDL: Seq[Observation], output: CdsResponseBuilder) = {
+    val hdlObs = HDL.headOption
+    if(FhirParseHelper.checkObservationValuesExist(List(hdlObs)) &&
+      FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get < 1.03){
+      output.withCard(_.loadCardWithPostTranslation("card-increase-hdl",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
     } else {
@@ -155,7 +193,7 @@ object QRisk3FlowExecution {
     var bmi: Double = 0
     val fh_cvd = checkExists(CVD_FMH) // Family History (Angina or heart attack in a 1st degree relative) Boolean
 
-    val cholesterolObs = TotalCholesterol.headOption // Total Cholesterol Observable Quantity
+    val   cholesterolObs = TotalCholesterol.headOption // Total Cholesterol Observable Quantity
     val hdlObs = HDL.headOption // HDL Cholesterol Observable Quantity
 
     val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP) // Systolic Blood Pressure Observable Quantity
@@ -207,19 +245,11 @@ object QRisk3FlowExecution {
       return None
     }
 
-    var rati: Double = 4 // Default value for TotalCholesterol/HDL ratio
 
-    var cholesterol: Double = 0
-    var hdl: Double = 0
 
-    /**
-     * If Total Cholesterol and HDL values are supplied, calculate the ratio and assign it to var rati
-     */
-    if (FhirParseHelper.checkObservationValuesExist(List(cholesterolObs, hdlObs))) {
-      cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-      hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-      rati = cholesterol / hdl
-    }
+    val cholesterol: Double = if(FhirParseHelper.checkObservationValuesExist(List(cholesterolObs))) {FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get} else {5.17}
+    val hdl: Double = if(FhirParseHelper.checkObservationValuesExist(List(hdlObs))) {FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get} else {1.55}
+    val rati: Double = cholesterol / hdl // Default value for TotalCholesterol/HDL ratio
 
     val sbp = if(sbpOpt.isEmpty) {125} else {sbpOpt.get}
     val sbpDeviation = sbpStdDeviation(BP_SBP)
