@@ -23,7 +23,8 @@ object ACCAHAFlowExecution {
    * @param HypertensiveTreatment Hypertensive Treatment Medication Statement
    * @param Ethnicity             Ethnicity Observation for Patient
    * @param responseBuilder       Response Builder
-   * @return if applicable, returns the related ACC/AHA Score Card as a pair, for patient and for healthy person of same gender, race and sex; else 'no-value'
+   * @return if applicable, returns the related ACC/AHA Score Card as a pair, for patient and
+   *         for healthy person of same gender, race and sex; else 'no-value'
    */
   def executeFlow(patient: Patient, TotalCholesterol: Seq[Observation], HDLCholesterol: Seq[Observation],
                   SystolicBP: Seq[Observation], SmokingStatus: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition],
@@ -48,6 +49,13 @@ object ACCAHAFlowExecution {
     output
   }
 
+  /**
+   * Recommends blood pressure reduction in case of need
+   *
+   * @param BP_SBP Systolic Blood Pressure of the patient
+   * @param output CdsResponseBuilder object
+   * @return whether or not SBP is too high and should be reduced
+   */
   private def recommendReduceBPIfApplicable(BP_SBP: Seq[Observation], output: CdsResponseBuilder) = {
     val sbp = FhirParseHelper.getSystolicBP(BP_SBP).get
     if (sbp > 140) {
@@ -59,7 +67,19 @@ object ACCAHAFlowExecution {
     }
   }
 
+  /**
+   * Recommends whether patient should stop smoking or not
+   *
+   * @param SmokingStatus patient's current smoking status
+   * @param output        CdsResponseBuilder object
+   * @return whether or not patient should stop smoking
+   */
   private def recommendStopSmokingIfApplicable(SmokingStatus: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
+    /*
+    I modified the condition because my algorithm only cares whether you
+    smoke or not, and my determineSmokingStatus function returns 1 if patient
+    is considered a smoker and 0 otherwise.
+    */
     if (determineSmokingStatus(SmokingStatus.headOption) > 0) {
       output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
         "effectiveDate" -> DateTimeUtil.zonedNow()
@@ -72,9 +92,68 @@ object ACCAHAFlowExecution {
   /**
    * Checks whether the needed resource is present or not
    *
-   * @param resources Resource to check the state of
+   * @param resources Resource to check the state of sequences
+   * @return 1 if nonempty 0 otherwise
    */
   def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
+
+  /**
+   * Determines whether patient has Hypertensive Treatment or not
+   *
+   * @param medications sequence of patient's Medication Statements
+   * @return 1 if patient is under treatment, 0 otherwise
+   */
+  private def checkHypertensiveTreatment(medications: Seq[MedicationStatement]): Int = {
+    val hypertensiveCodes = Set("C02", "C03", "C07", "C08", "C09")
+
+    val hasTreatment = medications.exists { medication =>
+      val medicationCodes = medication.medicationCodeableConcept.coding.map(_.code).toSeq
+      medicationCodes.exists(hypertensiveCodes.contains)
+    }
+
+    if (hasTreatment) 1 else 0
+  }
+
+  /**
+   * Determines the race of the patient based on Ethnicity observation
+   *
+   * @param ethnicity sequence of Ethnicity observations for patient
+   *                  Can be further optimized since ethnicity doesn't change
+   * @return race of the patient, only two are considered valid
+   */
+  private def determineRace(ethnicity: Seq[Observation]): String = {
+    val blackEthnicityCodes = Seq("LA6162-7")
+    /* Black or African-American LOINC code */
+    val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
+
+    /* Paper only cares whether the patient is black or not, so did I */
+    if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white"
+  }
+
+  /**
+   * Determines the smoking status of the patient
+   *
+   * @param smokingObs patient's smoking observation
+   * @return patient's current smoking status, 1 if smokes and 0 otherwise
+   */
+  //noinspection DuplicatedCode
+  private def determineSmokingStatus(smokingObs: Option[Observation]): Int = {
+    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
+      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
+    } else {
+      Seq("266919005")
+    }
+
+    val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
+    else if (smoking.contains("LA15920-4", "8517006")) 1
+    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
+    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
+    else if (smoking.contains("LA18981-3")) 4
+    else 0
+
+    /* Treat "never smoked" and "former smoker" as 0, others as 1 */
+    if (smoke_cat == 0 || smoke_cat == 1) 0 else 1
+  }
 
   /**
    * Validates given prefetch and returns the ACC/AHA risk score
@@ -108,7 +187,8 @@ object ACCAHAFlowExecution {
     val systolicBPOpt = FhirParseHelper.getSystolicBP(SystolicBP)
     val smokingObs = SmokingStatus.headOption
 
-    if (totalCholesterolOpt.isEmpty || hdlCholesterolOpt.isEmpty || systolicBPOpt.isEmpty || !FhirParseHelper.checkObservationValuesExist(List(smokingObs, raceObs))) {
+    if (totalCholesterolOpt.isEmpty || hdlCholesterolOpt.isEmpty || systolicBPOpt.isEmpty ||
+      !FhirParseHelper.checkObservationValuesExist(List(smokingObs, raceObs))) {
       println("Missing required data for ACC/AHA Risk Score calculation.")
       return None
     }
@@ -136,59 +216,6 @@ object ACCAHAFlowExecution {
   }
 
   /**
-   * Determines whether patient has Hypertensive Treatment or not
-   *
-   * @param medications sequence of patient's Medication Statements
-   */
-  private def checkHypertensiveTreatment(medications: Seq[MedicationStatement]): Int = {
-    val hypertensiveCodes = Set("C02", "C03", "C07", "C08", "C09")
-
-    val hasTreatment = medications.exists { medication =>
-      val medicationCodes = medication.medicationCodeableConcept.coding.map(_.code).toSeq
-      medicationCodes.exists(hypertensiveCodes.contains)
-    }
-
-    if (hasTreatment) 1 else 0
-  }
-
-  /**
-   * Determines the race of the patient based on Ethnicity observation
-   *
-   * @param ethnicity sequence of Ethnicity observations for patient
-   *                  Can be further optimized since ethnicity doesn't change
-   */
-  private def determineRace(ethnicity: Seq[Observation]): String = {
-    val blackEthnicityCodes = Seq("LA6162-7")
-    /* Black or African-American LOINC code */
-    val ethnicityCodes = ethnicity.flatMap(_.valueCodeableConcept.toSeq).flatMap(_.coding.map(_.code))
-
-    if (blackEthnicityCodes.intersect(ethnicityCodes).nonEmpty) "africanamerican" else "white" /* Paper only cares whether the patient is black or not, so did I */
-  }
-
-  /**
-   * Determines the smoking status of the patient
-   *
-   * @param smokingObs patient's smoking status
-   */
-  //noinspection DuplicatedCode
-  private def determineSmokingStatus(smokingObs: Option[Observation]): Int = {
-    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
-      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
-    } else {
-      Seq("266919005")
-    }
-
-    val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
-    else if (smoking.contains("LA15920-4", "8517006")) 1
-    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
-    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
-    else if (smoking.contains("LA18981-3")) 4
-    else 0
-
-    if (smoke_cat == 0 || smoke_cat == 1) 0 else 1 /* Treat "never smoked" and "former smoker" as 0, others as 1 */
-  }
-
-  /**
    * Calculate ACC/AHA risk score for male patients
    *
    * @param age                 age of patient
@@ -199,6 +226,7 @@ object ACCAHAFlowExecution {
    * @param diabetes            whether patient has diabetes or not (does NOT care about type of diabetes)
    * @param treatedHypertension whether patient is under treatment related to Hypertension
    * @param race                race of the patient, either "africanamerican" or "white", as per the source paper
+   * @return the CVD risk for patient, in percent
    */
   private def calculateACCRiskM(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
@@ -278,6 +306,7 @@ object ACCAHAFlowExecution {
    * @param diabetes            whether patient has diabetes or not (does NOT care about type of diabetes)
    * @param treatedHypertension whether patient is under treatment related to Hypertension
    * @param race                race of the patient, either "africanamerican" or "white", as per the source paper
+   * @return the CVD risk for patient, in percent
    */
   private def calculateACCRiskF(age: Int, totalCholesterol: Double, hdlCholesterol: Double, sbp: Double, smoker: Double,
                                 diabetes: Int, treatedHypertension: Int, race: String): Double = {
