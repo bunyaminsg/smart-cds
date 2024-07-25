@@ -41,11 +41,32 @@ object ACCAHAFlowExecution {
           "patientScoreValue" -> patientScore,
           "healthyScoreValue" -> healthyScore
         ))
-      case None =>
-        println("Unable to calculate ACC/AHA risk score due to missing or incomplete data.")
+        output = recommendStopSmokingIfApplicable(SmokingStatus, output)
+        output = recommendReduceBPIfApplicable(SystolicBP, output)
     }
 
     output
+  }
+
+  private def recommendReduceBPIfApplicable(BP_SBP: Seq[Observation], output: CdsResponseBuilder) = {
+    val sbp = FhirParseHelper.getSystolicBP(BP_SBP).get
+    if (sbp > 140) {
+      output.withCard(_.loadCardWithPostTranslation("card-reduce-bp",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  private def recommendStopSmokingIfApplicable(SmokingStatus: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if (determineSmokingStatus(SmokingStatus.headOption) > 0) {
+      output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
   }
 
   /**
