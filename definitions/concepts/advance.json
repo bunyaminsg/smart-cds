@@ -78,11 +78,13 @@
 
     "Type1Diabetes": {
       "resourceType": "Condition",
-      "type": "boolean"
+      "type": "boolean",
+      "selectDate": true
     },
     "Type2Diabetes": {
       "resourceType": "Condition",
-      "type": "boolean"
+      "type": "boolean",
+      "selectDate": true
     }
   }
 }
