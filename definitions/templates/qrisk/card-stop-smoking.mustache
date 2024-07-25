@@ -1,0 +1,46 @@
+{
+  "uuid": "QRISK STOP SMOKING",
+  "summary": "Stop smoking",
+  "indicator": "no-show",
+  "detail": "Stop smoking",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Stop smoking",
+      "uuid": "suggestion-stop-smoking",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "72166-2",
+                  "display": "Smoking Status"
+                }
+              ]
+            },
+            "valueCodeableConcept": {
+              "coding": [{
+                "code": "8517006",
+                "system": "http://loinc.org",
+                "display": "Former Smoker"
+              }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

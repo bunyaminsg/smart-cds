@@ -16,6 +16,8 @@
     "HDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.HDL}}&_sort=-date&_count=1",
     "BP_SBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_SBP}}&_sort=-date&_count=1",
     "SmokingStatus": "Observation?patient=Patient/{{context.patientId}}&code={{config.SmokingStatus}}&_sort=-date&_count=1",
-    "CVD_FMH": "FamilyMemberHistory?patient=Patient/{{context.patientId}}&code={{config.CVD}}&_count=1"
+    "CVD_FMH": "FamilyMemberHistory?patient=Patient/{{context.patientId}}&code={{config.CVD}}&_count=1",
+    "Atorvastatin": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.Atorvastatin}}&status=active&_count=1",
+    "CVD": "Condition?patient=Patient/{{context.patientId}}&code={{config.CVD}}&_count=1"
   }
 }

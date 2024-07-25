@@ -1,0 +1,45 @@
+{
+  "uuid": "QRISK REDUCE BMI",
+  "summary": "Reduce BMI <25",
+  "indicator": "no-show",
+  "detail": "Reduce Weight to lower BMI",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Reduce Weight to lower BMI",
+      "uuid": "suggestion-reduce-bmi",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "39156-5",
+                  "display": "Body Mass Index"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 25,
+              "unit": "kg/m2",
+              "system": "http://unitsofmeasure.org",
+              "code": "kg/m2"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
