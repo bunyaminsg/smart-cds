@@ -25,12 +25,14 @@ class QRiskService(cdsServiceContext: CdsServiceContext) extends BaseCdsService(
     val BP_SBP = cdsServiceRequest.prefetches.get("BP_SBP").head.map(res => res.extract[Observation])
     val SmokingStatus = cdsServiceRequest.prefetches.get("SmokingStatus").head.map(res => res.extract[Observation])
     val CVD_FMH = cdsServiceRequest.prefetches.get("CVD_FMH").head.map(res => res.extract[FamilyMemberHistory])
+    val CVD = cdsServiceRequest.prefetches.get("CVD").head.map(res => res.extract[Condition])
+    val Atorvastatin = cdsServiceRequest.prefetches.get("Atorvastatin").head.map(res => res.extract[MedicationStatement])
 
     val responseBuilder = createResponse(cdsServiceRequest)
 
     Future {
       QRiskFlowExecution.executeFlow(patient, AtrialFibrillation, RheumatoidArthritis, CKD4_5, Type1Diabetes, Type2Diabetes,
-        HypertensiveTreatment, BMI, TotalCholesterol, HDL, BP_SBP, SmokingStatus, CVD_FMH, responseBuilder).cdsResponse
+        HypertensiveTreatment, BMI, TotalCholesterol, HDL, BP_SBP, SmokingStatus, CVD_FMH, CVD, Atorvastatin, responseBuilder).cdsResponse
     }
   }
 }

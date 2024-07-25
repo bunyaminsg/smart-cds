@@ -30,7 +30,7 @@ object QRiskFlowExecution {
   def executeFlow(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD4_5: Seq[Condition],
                   Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
                   BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
-                  CVD_FMH: Seq[FamilyMemberHistory], responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
+                  CVD_FMH: Seq[FamilyMemberHistory], CVD: Seq[Condition], Atorvastatin: Seq[MedicationStatement], responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
 
     var output = responseBuilder
     val riskScores = calculateQRisk(patient, AtrialFibrillation, RheumatoidArthritis, CKD4_5, Type1Diabetes, Type2Diabetes,
@@ -42,9 +42,81 @@ object QRiskFlowExecution {
         "scoreValue" -> riskScores.get._1,
         "healthyValue" -> riskScores.get._2
       ))
+      output = recommendAtorvastatinIfApplicable(riskScores.get._1, Type2Diabetes, CKD4_5, CVD, Atorvastatin, HDL, TotalCholesterol, output)
+      output = recommendStopSmokingIfApplicable(SmokingStatus, output)
+      output = recommendReduceBPIfApplicable(BP_SBP, output)
+      output = recommendReduceBMIIfApplicable(BMI, output)
     }
 
     output
+  }
+
+  private def recommendReduceBMIIfApplicable(BMI: Seq[Observation], output: CdsResponseBuilder) = {
+    val bmi = BMI.head.valueQuantity.get.value.get
+    if (bmi > 25) {
+      output.withCard(_.loadCardWithPostTranslation("card-reduce-bmi",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  private def recommendReduceBPIfApplicable(BP_SBP: Seq[Observation], output: CdsResponseBuilder) = {
+    val sbp = FhirParseHelper.getSystolicBP(BP_SBP).get
+    if (sbp > 140) {
+      output.withCard(_.loadCardWithPostTranslation("card-reduce-bp",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  private def recommendStopSmokingIfApplicable(SmokingStatus: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if (getSmokingCategory(SmokingStatus.headOption) > 1) {
+      output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Seq[Condition], ckd: Seq[Condition], cvd: Seq[Condition], atorvastatin: Seq[MedicationStatement],
+                                        hdl: Seq[Observation], cholesterol: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
+    val _cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterol.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
+    val _hdl = FhirParseHelper.getQuantityObservationValue(hdl.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
+    val targetCholesterol = _cholesterol - ((_cholesterol - _hdl) * 0.4)
+    if (t2d.nonEmpty && ckd.isEmpty && atorvastatin.isEmpty) {
+      if (cvd.nonEmpty) {
+        output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
+          "effectiveDate" -> DateTimeUtil.zonedNow(),
+          "dose" -> 80,
+          "value" -> targetCholesterol
+        ))
+      } else if (riskScore > 10) {
+        output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
+          "effectiveDate" -> DateTimeUtil.zonedNow(),
+          "dose" -> 20,
+          "value" -> targetCholesterol
+        ))
+      } else {
+        output
+      }
+    } else {
+      output
+    }
+  }
+
+  private def getSmokingCategory(smokingStatus: Option[Observation]) = {
+    val smoking = smokingStatus.flatMap(_.valueCodeableConcept.map(_.coding.map(_.code).toSeq)).getOrElse(Seq("266919005"))
+    if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
+    else if (smoking.contains("LA15920-4", "8517006")) 1
+    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
+    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
+    else if (smoking.contains("LA18981-3")) 4
+    else 0
   }
 
   /**
@@ -85,15 +157,7 @@ object QRiskFlowExecution {
 
     val rati: Double = cholesterol / hdl
 
-    val smoking = if (smokingObs.isDefined) {
-      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
-    } else {Seq("266919005")}
-    val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
-    else if (smoking.contains("LA15920-4", "8517006")) 1
-    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
-    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
-    else if (smoking.contains("LA18981-3")) 4
-    else 0
+    val smoke_cat = getSmokingCategory(smokingObs)
 
     val surv = 10
     val town = 0

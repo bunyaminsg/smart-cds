@@ -1,0 +1,45 @@
+{
+  "uuid": "QRISK REDUCE NON-HDL",
+  "summary": "Reduce non-HDL Cholesterol",
+  "indicator": "no-show",
+  "detail": "Reduce non-HDL cholesterol 40% using Atorvastatin ({{dose}}mg)",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Reduce non-HDL cholesterol 40% using Atorvastatin ({{dose}}mg)",
+      "uuid": "suggestion-reduce-non-hdl",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "2093-3",
+                  "display": "Total Cholesterol"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": {{value}},
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
