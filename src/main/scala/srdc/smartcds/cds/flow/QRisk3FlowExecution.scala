@@ -55,8 +55,76 @@ object QRisk3FlowExecution {
         "scoreValue" -> riskScores.get._1, // QRisk3 Risk Score
         "healthyValue" -> riskScores.get._2 // QRisk3 Risk Score of a healthy person
       ))
+      output = recommendStopSmokingIfApplicable(SmokingStatus, output)
+      output = recommendReduceBPIfApplicable(BP_SBP, output)
+      output = recommendReduceBMIIfApplicable(BMI, output)
     }
     output
+  }
+
+  /**
+   *
+   * @param BMI Body Mass Index of the Patient
+   * @param output CdsResponseBuilder with the suggestion to lower the BMI If BMI is known and it is bigger than the healthy BMI value
+   * @return
+   */
+  private def recommendReduceBMIIfApplicable(BMI: Seq[Observation], output: CdsResponseBuilder) = {
+    val bmiOpt = Try(BMI.head.valueQuantity.get.value.get).toOption
+    if (bmiOpt.isDefined && bmiOpt.get > 25) {
+      output.withCard(_.loadCardWithPostTranslation("card-reduce-bmi",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  /**
+   *
+   * @param BP_SBP Systolic Blood Pressure of the Patient
+   * @param output CdsResponseBuilder with the suggestion to lower the SBP If SBP is known and it is bigger than the healthy SBP value
+   * @return
+   */
+  private def recommendReduceBPIfApplicable(BP_SBP: Seq[Observation], output: CdsResponseBuilder) = {
+    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
+    if(sbpOpt.isDefined && sbpOpt.get > 140){
+      output.withCard(_.loadCardWithPostTranslation("card-reduce-bp",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  /**
+   *
+   * @param SmokingStatus Patient's current smoking habit
+   * @param output CdsResponseBuilder with the suggestion to decrease Smoking If Smoking Status is known and the patient is highly addicted
+   * @return
+   */
+  private def recommendStopSmokingIfApplicable(SmokingStatus: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if (getSmokingCategory(SmokingStatus.headOption) > 1) {
+      output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
+        "effectiveDate" -> DateTimeUtil.zonedNow()
+      ))
+    } else {
+      output
+    }
+  }
+
+  /**
+   *
+   * @param smokingStatus Patient's smoking habit
+   * @return An integer that represents the health risk that smoking poses
+   */
+  private def getSmokingCategory(smokingStatus: Option[Observation]) = {
+    val smoking = smokingStatus.flatMap(_.valueCodeableConcept.map(_.coding.map(_.code).toSeq)).getOrElse(Seq("266919005"))
+    if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
+    else if (smoking.contains("LA15920-4", "8517006")) 1
+    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
+    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
+    else if (smoking.contains("LA18981-3")) 4
+    else 0
   }
 
   /**
@@ -159,15 +227,7 @@ object QRisk3FlowExecution {
     /**
      * Assign the risk of smoking to the var smoke_cat based on the smoking habit
      */
-    val smoking = if (smokingObs.isDefined && smokingObs.get.valueCodeableConcept.isDefined) {
-      smokingObs.get.valueCodeableConcept.get.coding.map(_.code).toSeq
-    } else {Seq("266919005")}
-    val smoke_cat = if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
-    else if (smoking.contains("LA15920-4", "8517006")) 1
-    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
-    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
-    else if (smoking.contains("LA18981-3")) 4
-    else 0
+    val smoke_cat = getSmokingCategory(smokingObs)
 
     val maleIndicator: Boolean = patient.gender.contains("male") // A boolean flag indicating the gender is male
     val surv = 10
