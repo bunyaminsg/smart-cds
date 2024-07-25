@@ -34,13 +34,15 @@ object AdvanceFlowExecution {
 
     val age = FhirParseHelper.getAge(patient)
     val isFemale = patient.gender.contains("female")
-    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
-    val dbpOpt = FhirParseHelper.getDiastolicBP(BP_DBP)
+
+
+    //If NonHDL cholesterol data exists, uses that data.
+    //Otherwise, calculate the value from total cholesterol and HDL cholesterol
     var nonhdl = 0.0
     if(checkExists(NonHDL) == 1){
       val nonhdlObs = NonHDL.headOption
       nonhdl = FhirParseHelper.getQuantityObservationValue(nonhdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-    } else if(checkExists(HDL)==1 && checkExists(TotalCholesterol) == 1){
+    } else {
       var hdl= 0.0
       if(checkExists(HDL)==1){
         val hdlObs = HDL.headOption
@@ -59,18 +61,24 @@ object AdvanceFlowExecution {
       nonhdl = cholesterol - hdl
     }
 
+    //Get Albumin/Creatine Ratio Observation
     var acr = 0.0
     if(checkExists(ACR) == 1){
       val acrObs = ACR.headOption
       acr = FhirParseHelper.getQuantityObservationValue(acrObs, Option(UnitConceptEnum.ACR)).get
     } else {acr = 2.0}
 
+    //Get Hba1c Observation
     var hba1c = 0.0
     if(checkExists(HbA1C) == 1){
       val hba1cObs = HbA1C.headOption
       hba1c = FhirParseHelper.getQuantityObservationValue(hba1cObs, Option(UnitConceptEnum.HBA1C)).get
     } else {hba1c = 5.0}
 
+
+    //Get blood pressure observations and calculate pulse pressure
+    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
+    val dbpOpt = FhirParseHelper.getDiastolicBP(BP_DBP)
     var sbp = 120.0
     var dbp = 80.0
     if(sbpOpt.isDefined){
@@ -79,12 +87,15 @@ object AdvanceFlowExecution {
     if(dbpOpt.isDefined) {
       dbp = dbpOpt.get
     }
+    val pulse_p = sbp - dbp
 
+    //Get boolean type parameters
     val b_AF = checkExists(AtrialFibrillation)
     val b_treatedhyp = checkExists(HypertensiveTreatment)
     val b_R = checkExists(Retinopathy)
 
 
+    //Get diabetes observation and calculate diabetes duration and age
     var diabetes_duration = -1
     var diabetes_age = 0
     if(checkExists(Type1Diabetes) == 1 && checkExists(Type2Diabetes) == 1){
@@ -106,9 +117,16 @@ object AdvanceFlowExecution {
       diabetes_age = age - diabetes_duration
     }
 
-    val pulse_p = sbp - dbp
+
+
+
+    //Initialize point summations
     var sum = 0
     var healthy_sum = 0
+
+
+    //Check each of the values and accumulate points corresponding to the parameter values
+
     var score = 0
     if(diabetes_age<=34) {
       score = 0
@@ -150,19 +168,25 @@ object AdvanceFlowExecution {
       sum -= 1
       healthy_sum -= 1
     }
+
     if(pulse_p > 110) {
       sum += 2
     } else if(pulse_p >= 50) {
       sum += 1
     }
+
     if(b_R == 1) {sum += 1}
+
     if(b_treatedhyp == 1) {sum += 1}
+
     if(b_AF == 1) {sum += 2}
+
     if(hba1c >= 9) {
       sum += 2
     } else if(hba1c >= 6) {
       sum += 1
     }
+
     if(nonhdl>=9) {
       sum += 5
     } else if(nonhdl >= 6){
@@ -170,14 +194,17 @@ object AdvanceFlowExecution {
     } else if(nonhdl >= 3){
       sum += 1
     }
+
     if(acr>30) {
       sum += 3
     } else if(acr >= 3){
       sum +=2
     }
 
+    //Get risk percentages corresponding to the accumulated risk points
     val result = mapResult(sum)
     val healthy_score = mapResult(healthy_sum)
+
 
     var output = responseBuilder
     output = output.withCard(_.loadCardWithPostTranslation("card-score",
