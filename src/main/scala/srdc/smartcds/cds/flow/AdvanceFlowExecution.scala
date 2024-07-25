@@ -36,7 +36,6 @@ object AdvanceFlowExecution {
     val isFemale = patient.gender.contains("female")
     val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
     val dbpOpt = FhirParseHelper.getDiastolicBP(BP_DBP)
-
     var nonhdl = 0.0
     if(checkExists(NonHDL) == 1){
       val nonhdlObs = NonHDL.headOption
@@ -72,8 +71,14 @@ object AdvanceFlowExecution {
       hba1c = FhirParseHelper.getQuantityObservationValue(hba1cObs, Option(UnitConceptEnum.HBA1C)).get
     } else {hba1c = 5.0}
 
-    val sbp = sbpOpt.get
-    val dbp = dbpOpt.get
+    var sbp = 120.0
+    var dbp = 80.0
+    if(sbpOpt.isDefined){
+       sbp = sbpOpt.get
+    }
+    if(dbpOpt.isDefined) {
+      dbp = dbpOpt.get
+    }
 
     val b_AF = checkExists(AtrialFibrillation)
     val b_treatedhyp = checkExists(HypertensiveTreatment)
@@ -81,20 +86,25 @@ object AdvanceFlowExecution {
 
 
     var diabetes_duration = -1
-    if(checkExists(Type1Diabetes) == 1){
-      diabetes_duration = Period.between(LocalDate.parse(Type1Diabetes.head.recordedDate.get, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
-    } else if(checkExists(Type2Diabetes) == 1) {
-      diabetes_duration = Period.between(LocalDate.parse(Type2Diabetes.head.recordedDate.get, DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
-    } else {
-      println("Person is not diabetic")
-      None
+    var diabetes_age = 0
+    if(checkExists(Type1Diabetes) == 1 && checkExists(Type2Diabetes) == 1){
+      val type1DiabetesDuration = Period.between(LocalDate.parse(Type1Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
+      val type2DiabetesDuration = Period.between(LocalDate.parse(Type2Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
+      if( type1DiabetesDuration > type2DiabetesDuration) {
+        diabetes_duration = type1DiabetesDuration
+      } else {
+        diabetes_duration = type2DiabetesDuration
+      }
+      diabetes_age = age - diabetes_duration
     }
-    val diabetes_age = age + diabetes_duration
-    if (sbpOpt.isEmpty|| dbpOpt.isEmpty) {
-      println("SBP, DBP, ACR, HbA1C or NonHDL not found")
-      None
+    else if(checkExists(Type1Diabetes) == 1){
+      diabetes_duration = Period.between(LocalDate.parse(Type1Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
+      diabetes_age = age - diabetes_duration
     }
-
+    else if(checkExists(Type2Diabetes) == 1) {
+      diabetes_duration = Period.between(LocalDate.parse(Type2Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
+      diabetes_age = age - diabetes_duration
+    }
 
     val pulse_p = sbp - dbp
     var sum = 0
@@ -175,7 +185,6 @@ object AdvanceFlowExecution {
       "scoreValue" -> result,
       "healthyValue" -> healthy_score
     ))
-    println(output)
     output
 
   }
@@ -208,7 +217,7 @@ object AdvanceFlowExecution {
         case 19 => 41.9
         case 20 => 57.8
         case 21 => 71.4
-        case _ => 83
+        case _ => 84
       }
     }
     result
