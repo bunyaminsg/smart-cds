@@ -1857,6 +1857,44 @@
       "resource": {
         "resourceType": "ValueSet",
         "status": "active",
+        "id": "Ethnicity",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "46463-6",
+                  "display": "Race or ethnicity",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Race or ethnicity"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Raza o etnia"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Rasse oder ethnische Zugehörigkeit"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Rasa sau etnia"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
         "id": "ExerciseHabits",
         "compose": {
           "include": [

@@ -1,0 +1,98 @@
+{
+  "resourceType": "ValueSet",
+  "id": "vs-ethnicity",
+  "meta": {
+    "versionId": "8",
+    "lastUpdated": "2024-02-27T08:10:52.485Z",
+    "tag": [
+      {
+        "code": "custom",
+        "system": "https://fhir.moph.gov.qa/CodeSystem/value-set-type"
+      }
+    ]
+  },
+  "url": "https://fhir.moph.gov.qa/ValueSet/ethnicity",
+  "name": "vs-ethnicity",
+  "status": "active",
+  "date": "2024-02-27T08:10:53.537Z",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "version": "20230301",
+        "concept": [
+          {
+            "code": "LA6155-1",
+            "display": "American Indian or Alaska Native",
+            "designation": [
+              {
+                "language": "en",
+                "value": "American Indian or Alaska Native"
+              }
+            ]
+          },
+          {
+            "code": "LA6156-9",
+            "display": "Asian",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Asian"
+              }
+            ]
+          },
+          {
+            "code": "LA6162-7",
+            "display": "Black or African-American",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Black or African-American"
+              }
+            ]
+          },
+          {
+            "code": "LA6214-6",
+            "display": "Hispanic or Latino",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Hispanic or Latino"
+              }
+            ]
+          },
+          {
+            "code": "LA6266-6",
+            "display": "Native Hawaiian or Pacific Islander",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Native Hawaiian or Pacific Islander"
+              }
+            ]
+          },
+          {
+            "code": "LA4457-3",
+            "display": "White",
+            "designation": [
+              {
+                "language": "en",
+                "value": "White"
+              }
+            ]
+          },
+          {
+            "code": "LA4489-6",
+            "display": "Unknown",
+            "designation": [
+              {
+                "language": "en",
+                "value": "Unknown"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
