@@ -115,23 +115,6 @@ object ACCAHAFlowExecution {
   def checkExists(resources: Seq[Any]): Int = if (resources.nonEmpty) 1 else 0
 
   /**
-   * Determines whether patient has Hypertensive Treatment or not
-   *
-   * @param medications sequence of patient's Medication Statements
-   * @return 1 if patient is under treatment, 0 otherwise
-   */
-  private def checkHypertensiveTreatment(medications: Seq[MedicationStatement]): Int = {
-    val hypertensiveCodes = Set("C02", "C03", "C07", "C08", "C09")
-
-    val hasTreatment = medications.exists { medication =>
-      val medicationCodes = medication.medicationCodeableConcept.coding.map(_.code).toSeq
-      medicationCodes.exists(hypertensiveCodes.contains)
-    }
-
-    if (hasTreatment) 1 else 0
-  }
-
-  /**
    * Determines the race of the patient based on Ethnicity observation
    *
    * @param ethnicity sequence of Ethnicity observations for patient
@@ -197,7 +180,7 @@ object ACCAHAFlowExecution {
     val raceOpt = Option(determineRace(Ethnicity))
     val raceObs = Ethnicity.headOption
     val diabetes = checkExists(Type1Diabetes) | checkExists(Type2Diabetes)
-    val treatedHypertension = checkHypertensiveTreatment(HypertensiveTreatment)
+    val treatedHypertension = checkExists(HypertensiveTreatment)
 
     val totalCholesterolOpt = Try(TotalCholesterol.head.valueQuantity.get.value.get).toOption
     val hdlCholesterolOpt = Try(HDLCholesterol.head.valueQuantity.get.value.get).toOption
