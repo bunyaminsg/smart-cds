@@ -20,16 +20,18 @@ class AdvanceService(cdsServiceContext: CdsServiceContext) extends BaseCdsServic
     val ACR = cdsServiceRequest.prefetches.get("ACR").head.map(res => res.extract[Observation])
     val TotalCholesterol = cdsServiceRequest.prefetches.get("TotalCholesterol").head.map(res => res.extract[Observation])
     val HDL = cdsServiceRequest.prefetches.get("HDL").head.map(res => res.extract[Observation])
-    val NonHDL = cdsServiceRequest.prefetches.get("NonHDL").head.map(res => res.extract[Observation])
     val BP_SBP = cdsServiceRequest.prefetches.get("BP_SBP").head.map(res => res.extract[Observation])
     val BP_DBP = cdsServiceRequest.prefetches.get("BP_DBP").head.map(res => res.extract[Observation])
     val Type1Diabetes = cdsServiceRequest.prefetches.get("Type1Diabetes").head.map(res => res.extract[Condition])
     val Type2Diabetes = cdsServiceRequest.prefetches.get("Type2Diabetes").head.map(res => res.extract[Condition])
+    val CKD4_5 = cdsServiceRequest.prefetches.get("CKD4_5").head.map(res => res.extract[Condition])
+    val CVD = cdsServiceRequest.prefetches.get("CVD").head.map(res => res.extract[Condition])
+    val Atorvastatin = cdsServiceRequest.prefetches.get("Atorvastatin").head.map(res => res.extract[MedicationStatement])
 
     val responseBuilder = createResponse(cdsServiceRequest)
     Future{
       AdvanceFlowExecution.executionFlow(patient, AtrialFibrillation, Retinopathy, HypertensiveTreatment,
-        HbA1C, ACR, TotalCholesterol, HDL, NonHDL, BP_SBP, BP_DBP, Type1Diabetes, Type2Diabetes,  responseBuilder).cdsResponse
+        HbA1C, ACR, TotalCholesterol, HDL, BP_SBP, BP_DBP, Type1Diabetes, Type2Diabetes, CKD4_5, CVD, Atorvastatin,  responseBuilder).cdsResponse
     }
   }
 }
