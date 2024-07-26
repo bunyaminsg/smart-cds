@@ -1,3 +1,27 @@
+/**
+ * This project utilizes the QRisk3 algorithm developed by Professor Julia Hippisley-Cox
+ * and her team at the University of Nottingham. The algorithm is used to estimate the
+ * 10-year risk of cardiovascular disease in patients, incorporating a range of risk factors.
+ *
+ * Citation:
+ * Hippisley-Cox, J., Coupland, C., & Brindle, P. (2017). Development and validation of
+ * QRISK3 risk prediction algorithms to estimate future risk of cardiovascular disease:
+ * prospective cohort study. BMJ, 357, j2099. doi:10.1136/bmj.j2099. Available at
+ * https://qrisk.org/.
+ *
+ * Acknowledgement:
+ * We would like to thank the EMIS practices that contribute to QResearch, and EMIS and the
+ * University of Nottingham for their expertise in establishing, developing, and supporting
+ * the QResearch database. We also acknowledge the Office for National Statistics for
+ * providing the mortality data, and NHS Digital for the Hospital Episode Statistics data.
+ *
+ * For more details on the QRisk3 algorithm, please refer to the full article published in BMJ:
+ * Hippisley-Cox, J., Coupland, C., & Brindle, P. (2017). Development and validation of
+ * QRISK3 risk prediction algorithms to estimate future risk of cardiovascular disease:
+ * prospective cohort study. BMJ, 357, j2099. doi:10.1136/bmj.j2099. Available at
+ * http://www.bmj.com/content/357/bmj.j2099.
+ */
+
 package srdc.smartcds.cds.flow
 
 import io.onfhir.cds.model.CdsResponseBuilder
