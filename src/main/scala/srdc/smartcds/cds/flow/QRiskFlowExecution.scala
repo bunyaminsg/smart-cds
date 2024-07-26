@@ -1,40 +1,41 @@
 package srdc.smartcds.cds.flow
 
 import io.onfhir.cds.model.CdsResponseBuilder
-import srdc.smartcds.util.{ConceptIdUtil, DateTimeUtil, FHIRStatus, FhirParseHelper, UnitConceptEnum, ValueSetUtil}
-import srdc.smartcds.model.fhir.{Condition, FamilyMemberHistory, Goal, MedicationStatement, Observation, Patient, Quantity}
+import srdc.smartcds.util.{DateTimeUtil, SmokingCategoryEnum}
 
 import scala.math.{exp, pow}
-import scala.util.Try
 
 object QRiskFlowExecution {
 
   /**
    * Executes QRISK calculation service
-   * @param patient
-   * @param AtrialFibrillation
-   * @param RheumatoidArthritis
-   * @param CKD4_5
-   * @param Type1Diabetes
-   * @param Type2Diabetes
-   * @param HypertensiveTreatment
-   * @param BMI
-   * @param TotalCholesterol
-   * @param HDL
-   * @param BP_SBP
-   * @param SmokingStatus
-   * @param CVD_FMH
+   * @param age
+   * @param gender
+   * @param atrialFibrillation
+   * @param rheumatoidArthritis
+   * @param ckd45
+   * @param type1Diabetes
+   * @param type2Diabetes
+   * @param hypertensiveTreatment
+   * @param bmi
+   * @param totalCholesterol
+   * @param hdl
+   * @param bp
+   * @param smokingStatus
+   * @param cvdFmh
+   * @param cvd
+   * @param atorvastatin
    * @param responseBuilder
    * @return
    */
-  def executeFlow(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD4_5: Seq[Condition],
-                  Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
-                  BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
-                  CVD_FMH: Seq[FamilyMemberHistory], CVD: Seq[Condition], Atorvastatin: Seq[MedicationStatement], responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
-
+  def executeFlow(age: Int, gender: String, atrialFibrillation: Int, rheumatoidArthritis: Int, ckd45: Int,
+                          type1Diabetes: Int, type2Diabetes: Int, hypertensiveTreatment: Int, bmi: Option[Double],
+                          totalCholesterol: Option[Double], hdl: Option[Double],
+                          bp: Option[Double], smokingStatus: Option[Int], cvdFmh: Int, cvd: Boolean, atorvastatin: Boolean,
+                          responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
     var output = responseBuilder
-    val riskScores = calculateQRisk(patient, AtrialFibrillation, RheumatoidArthritis, CKD4_5, Type1Diabetes, Type2Diabetes,
-      HypertensiveTreatment, BMI, TotalCholesterol, HDL, BP_SBP, SmokingStatus, CVD_FMH)
+    val riskScores = calculateQRisk(age, gender, atrialFibrillation, rheumatoidArthritis, ckd45, type1Diabetes, type2Diabetes,
+      hypertensiveTreatment, bmi, totalCholesterol, hdl, bp, smokingStatus, cvdFmh)
 
     if (riskScores.isDefined) {
       output = output.withCard(_.loadCardWithPostTranslation("card-score",
@@ -42,18 +43,17 @@ object QRiskFlowExecution {
         "scoreValue" -> riskScores.get._1,
         "healthyValue" -> riskScores.get._2
       ))
-      output = recommendAtorvastatinIfApplicable(riskScores.get._1, Type2Diabetes, CKD4_5, CVD, Atorvastatin, HDL, TotalCholesterol, output)
-      output = recommendStopSmokingIfApplicable(SmokingStatus, output)
-      output = recommendReduceBPIfApplicable(BP_SBP, output)
-      output = recommendReduceBMIIfApplicable(BMI, output)
+      output = recommendAtorvastatinIfApplicable(riskScores.get._1, type2Diabetes == 1, ckd45 == 1, cvd, atorvastatin, hdl, totalCholesterol, output)
+      output = recommendStopSmokingIfApplicable(smokingStatus, output)
+      output = recommendReduceBPIfApplicable(bp, output)
+      output = recommendReduceBMIIfApplicable(bmi, output)
     }
 
     output
   }
 
-  private def recommendReduceBMIIfApplicable(BMI: Seq[Observation], output: CdsResponseBuilder) = {
-    val bmi = BMI.head.valueQuantity.get.value.get
-    if (bmi > 25) {
+  private def recommendReduceBMIIfApplicable(bmi: Option[Double], output: CdsResponseBuilder) = {
+    if (bmi.exists(_ > 25)) {
       output.withCard(_.loadCardWithPostTranslation("card-reduce-bmi",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
@@ -62,9 +62,8 @@ object QRiskFlowExecution {
     }
   }
 
-  private def recommendReduceBPIfApplicable(BP_SBP: Seq[Observation], output: CdsResponseBuilder) = {
-    val sbp = FhirParseHelper.getSystolicBP(BP_SBP).get
-    if (sbp > 140) {
+  private def recommendReduceBPIfApplicable(sbp: Option[Double], output: CdsResponseBuilder) = {
+    if (sbp.exists(_ > 140)) {
       output.withCard(_.loadCardWithPostTranslation("card-reduce-bp",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
@@ -73,8 +72,8 @@ object QRiskFlowExecution {
     }
   }
 
-  private def recommendStopSmokingIfApplicable(SmokingStatus: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
-    if (getSmokingCategory(SmokingStatus.headOption) > 1) {
+  private def recommendStopSmokingIfApplicable(smokingStatus: Option[Int], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if (smokingStatus.get >= SmokingCategoryEnum.LIGHT) {
       output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
@@ -83,13 +82,13 @@ object QRiskFlowExecution {
     }
   }
 
-  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Seq[Condition], ckd: Seq[Condition], cvd: Seq[Condition], atorvastatin: Seq[MedicationStatement],
-                                        hdl: Seq[Observation], cholesterol: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
-    val _cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterol.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
-    val _hdl = FhirParseHelper.getQuantityObservationValue(hdl.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
+  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Boolean, ckd: Boolean, cvd: Boolean, atorvastatin: Boolean,
+                                        hdl: Option[Double], cholesterol: Option[Double], output: CdsResponseBuilder): CdsResponseBuilder = {
+    val _cholesterol = cholesterol.get
+    val _hdl = hdl.get
     val targetCholesterol = _cholesterol - ((_cholesterol - _hdl) * 0.4)
-    if (t2d.nonEmpty && ckd.isEmpty && atorvastatin.isEmpty) {
-      if (cvd.nonEmpty) {
+    if (t2d && !ckd && !atorvastatin) {
+      if (cvd) {
         output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
           "effectiveDate" -> DateTimeUtil.zonedNow(),
           "dose" -> 80,
@@ -109,61 +108,32 @@ object QRiskFlowExecution {
     }
   }
 
-  private def getSmokingCategory(smokingStatus: Option[Observation]) = {
-    val smoking = smokingStatus.flatMap(_.valueCodeableConcept.map(_.coding.map(_.code).toSeq)).getOrElse(Seq("266919005"))
-    if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
-    else if (smoking.contains("LA15920-4", "8517006")) 1
-    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
-    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
-    else if (smoking.contains("LA18981-3")) 4
-    else 0
-  }
-
   /**
    * Validates given prefetch and returns the QRISK score
    */
-  def calculateQRisk(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD4_5: Seq[Condition],
-                     Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
-                     BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
-                     CVD_FMH: Seq[FamilyMemberHistory]): Option[(Double, Double)] = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
+  def calculateQRisk(age: Int, gender: String, b_AF: Int, b_ra: Int, b_renal: Int, b_type1: Int, b_type2: Int, b_treatedhyp: Int,
+                     bmiOpt: Option[Double], cholesterolOpt: Option[Double], hdlOpt: Option[Double], sbpOpt: Option[Double], smokingCategory: Option[Int],
+                     fh_cvd: Int): Option[(Double, Double)] = {
 
-    val age = FhirParseHelper.getAge(patient)
-    val b_AF = checkExists(AtrialFibrillation)
-    val b_ra = checkExists(RheumatoidArthritis)
-    val b_renal = checkExists(CKD4_5)
-    val b_treatedhyp = checkExists(HypertensiveTreatment)
-    val b_type1 = checkExists(Type1Diabetes)
-    val b_type2 = checkExists(Type2Diabetes)
-    val bmiOpt = Try(BMI.head.valueQuantity.get.value.get).toOption
-    val bmi = if (bmiOpt.isDefined) { bmiOpt.get } else { return None }
-    val fh_cvd = checkExists(CVD_FMH)
-
-    val cholesterolObs = TotalCholesterol.headOption
-    val hdlObs = HDL.headOption
-
-    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
-
-    val smokingObs = SmokingStatus.headOption
-
-    if (sbpOpt.isEmpty || !FhirParseHelper.checkObservationValuesExist(List(cholesterolObs, hdlObs, smokingObs))) {
-      println("SBP, Cholesterol or HDL not found")
+    if (bmiOpt.isEmpty || sbpOpt.isEmpty || hdlOpt.isEmpty || cholesterolOpt.isEmpty || smokingCategory.isEmpty) {
+      println("BMI, SBP, Smoking, Cholesterol or HDL not found")
       return None
     }
 
-    val cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-    val hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+    val bmi = bmiOpt.get
+    val cholesterol = cholesterolOpt.get
+    val hdl = hdlOpt.get
     val sbp = sbpOpt.get
 
     val rati: Double = cholesterol / hdl
 
-    val smoke_cat = getSmokingCategory(smokingObs)
+    val smoke_cat = smokingCategory.get
 
     val surv = 10
     val town = 0
     val ethrisk = 0
 
-    if (patient.gender.contains("male")) {
+    if (gender == "male") {
       val patientScore = calculateQRiskM(age, b_AF, b_ra, b_renal, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, smoke_cat, surv, town)
       val healthyScore = calculateQRiskM(age, 0, 0, 0, 0, 0, 0, 25, 0, 0, 4, 125, 0, surv, town)
       Some(patientScore,healthyScore)

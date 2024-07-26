@@ -102,3 +102,12 @@ object ObservationUnitEnum extends Enumeration {
   val UMOL_L = "µmol/l"
   val MEQ_L = "meq/l"
 }
+
+object SmokingCategoryEnum extends Enumeration {
+  type SmokingCategoryEnum = Int
+  val NEVER = 0
+  val FORMER = 1
+  val LIGHT = 2
+  val DAILY = 3
+  val HEAVY = 4
+}
