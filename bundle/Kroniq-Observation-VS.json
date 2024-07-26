@@ -11,6 +11,36 @@
       "resource": {
         "resourceType": "ValueSet",
         "status": "active",
+        "id": "Ethnicity",
+        "compose": {
+          "include": [
+            {
+              "system": "http://srdc.com.tr/custom",
+              "concept": [
+                {
+                  "code": "qrisk3-ethnicity",
+                  "display": "Ethnicity",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Ethnicity"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Etnicidad"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
         "id": "Region",
         "compose": {
           "include": [
@@ -1844,6 +1874,44 @@
                     {
                       "language": "ro",
                       "value": "Eozinofile [#/volum] în sânge"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
+        "id": "Ethnicity",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "46463-6",
+                  "display": "Race or ethnicity",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Race or ethnicity"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Raza o etnia"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Rasse oder ethnische Zugehörigkeit"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Rasa sau etnia"
                     }
                   ]
                 }

@@ -1,0 +1,108 @@
+{
+  "serviceId": "qrisk3",
+  "concepts": {
+    "AtrialFibrillation": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Corticosteroids": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean"
+    },
+    "Antipsychotics": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean"
+    },
+    "RheumatoidArthritis": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "CKD3_4_5": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "CKD Stage > 3"
+      }
+    },
+    "Type1Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Type2Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "HypertensiveTreatment": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "Hypertensive Treatment"
+      }
+    },
+    "BMI": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "kg/m2",
+      "min": 0,
+      "max": 99
+    },
+    "TotalCholesterol": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999
+    },
+    "HDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/dL",
+      "min": 0,
+      "max": 999
+    },
+    "BP_SBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "SystolicBP"
+    },
+    "SmokingStatus": {
+      "resourceType": "Observation",
+      "type": "CodeableConcept",
+      "select": "ValueSet/vs-smoking-status",
+      "required": true
+    },
+    "Ethnicity": {
+      "resourceType": "Observation",
+      "type": "CodeableConcept",
+      "select": "ValueSet/vs-qrisk3-ethnicity",
+      "required": true
+    },
+    "SystemicLupusErythematosus": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "SevereMentalIllness": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "ErectileDysfunction": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Migraine": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "CVD_FMH": {
+      "resourceType": "FamilyMemberHistory",
+      "type": "boolean",
+      "conceptId": "CVD",
+      "label": "Family History of CVD"
+    }
+  }
+}

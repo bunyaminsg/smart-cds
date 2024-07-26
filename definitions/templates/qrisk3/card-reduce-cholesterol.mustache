@@ -1,0 +1,45 @@
+{
+  "uuid": "QRISK3 REDUCE CHOLESTEROL",
+  "summary": "Reduce Total Cholesterol",
+  "indicator": "no-show",
+  "detail": "Control total cholesterol (Cholesterol = 200 mg/dL)",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Control total cholesterol (Cholesterol = 200 mg/dL)",
+      "uuid": "suggestion-reduce-cholesterol",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "2093-3",
+                  "display": "Cholesterol"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 200,
+              "unit": "mg/dL",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/dL"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
