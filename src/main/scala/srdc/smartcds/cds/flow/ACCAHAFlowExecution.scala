@@ -7,6 +7,23 @@ import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper}
 import scala.math.{exp, log, pow}
 import scala.util.Try
 
+/*
+
+This implementation of the algorithm is based on the guidelines provided in the following publication:
+
+Goff DC Jr, Lloyd-Jones DM, Bennett G, Coady S, D’Agostino RB Sr, Gibbons R, Greenland P, Lackland DT, Levy D, O’Donnell CJ,
+Robinson JG, Schwartz JS, Shero ST, Smith SC Jr, Sorlie P, Stone NJ, Wilson PWF.
+2013 ACC/AHA guideline on the assessment of cardiovascular risk: a report of the American College of Cardiology/American Heart Association Task Force on
+Practice Guidelines. Circulation. 2014;129(suppl 2):S49-S73.
+
+© 2013 The Expert Work Group Members. This work is licensed under the Creative Commons Attribution Non-Commercial-NoDerivs License.
+You may not use this work for commercial purposes, and you may not modify this work.
+For any use, distribution, and reproduction in any medium, you must properly cite the original work.
+
+For more information, visit: https://creativecommons.org/licenses/by-nc-nd/3.0/
+
+*/
+
 //noinspection DuplicatedCode
 object ACCAHAFlowExecution {
 
