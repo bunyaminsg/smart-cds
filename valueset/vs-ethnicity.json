@@ -1,139 +1,93 @@
 {
   "resourceType": "ValueSet",
-  "url": "http://kroniq.srdc.com.tr/fhir/ValueSet/qrisk3-ethnicity",
-  "version": "1.0.0",
-  "name": "QRisk3 Ethnicity Risk",
-  "id": "vs-qrisk3-ethnicity",
-  "date": "2023-07-19T11:33:06.965Z",
+  "id": "vs-ethnicity",
+  "meta": {
+    "versionId": "8",
+    "lastUpdated": "2024-02-27T08:10:52.485Z",
+    "tag": [
+      {
+        "code": "custom",
+        "system": "https://fhir.moph.gov.qa/CodeSystem/value-set-type"
+      }
+    ]
+  },
+  "url": "https://fhir.moph.gov.qa/ValueSet/ethnicity",
+  "name": "vs-ethnicity",
   "status": "active",
+  "date": "2024-02-27T08:10:53.537Z",
   "compose": {
     "include": [
       {
-        "system": "http://srdc.com.tr/qrisk3-ethnicity",
+        "system": "http://loinc.org",
+        "version": "20230301",
         "concept": [
           {
-            "code": "0",
-            "display": "White or not stated",
+            "code": "LA6155-1",
+            "display": "American Indian or Alaska Native",
             "designation": [
               {
                 "language": "en",
-                "value": "White or not stated"
-              },
-              {
-                "language": "es",
-                "value": "Blanco o no declarado"
+                "value": "American Indian or Alaska Native"
               }
             ]
           },
           {
-            "code": "1",
-            "display": "Indian",
+            "code": "LA6156-9",
+            "display": "Asian",
             "designation": [
               {
                 "language": "en",
-                "value": "Indian"
-              },
-              {
-                "language": "es",
-                "value": "indio"
+                "value": "Asian"
               }
             ]
           },
           {
-            "code": "2",
-            "display": "Pakistani",
+            "code": "LA6162-7",
+            "display": "Black or African-American",
             "designation": [
               {
                 "language": "en",
-                "value": "Pakistani"
-              },
-              {
-                "language": "es",
-                "value": "pakistaní"
+                "value": "Black or African-American"
               }
             ]
           },
           {
-            "code": "3",
-            "display": "Bangladeshi",
+            "code": "LA6214-6",
+            "display": "Hispanic or Latino",
             "designation": [
               {
                 "language": "en",
-                "value": "Bangladeshi"
-              },
-              {
-                "language": "es",
-                "value": "bangladesí"
+                "value": "Hispanic or Latino"
               }
             ]
           },
           {
-            "code": "4",
-            "display": "Other Asian",
+            "code": "LA6266-6",
+            "display": "Native Hawaiian or Pacific Islander",
             "designation": [
               {
                 "language": "en",
-                "value": "Other Asian"
-              },
-              {
-                "language": "es",
-                "value": "Otro asiático"
+                "value": "Native Hawaiian or Pacific Islander"
               }
             ]
           },
           {
-            "code": "5",
-            "display": "Black Caribbean",
+            "code": "LA4457-3",
+            "display": "White",
             "designation": [
               {
                 "language": "en",
-                "value": "Black Caribbean"
-              },
-              {
-                "language": "es",
-                "value": "Caribe negro"
+                "value": "White"
               }
             ]
           },
           {
-            "code": "6",
-            "display": "Black African",
+            "code": "LA4489-6",
+            "display": "Unknown",
             "designation": [
               {
                 "language": "en",
-                "value": "Black African"
-              },
-              {
-                "language": "es",
-                "value": "negro africano"
-              }
-            ]
-          },
-          {
-            "code": "7",
-            "display": "Chinese",
-            "designation": [
-              {
-                "language": "en",
-                "value": "Chinese"
-              },
-              {
-                "language": "es",
-                "value": "Chino"
-              }
-            ]
-          },
-          {
-            "code": "8",
-            "display": "Other ethnic group",
-            "designation": [
-              {
-                "language": "en",
-                "value": "Other ethnic group"
-              },
-              {
-                "language": "es",
-                "value": "Otro grupo étnico"
+                "value": "Unknown"
               }
             ]
           }
