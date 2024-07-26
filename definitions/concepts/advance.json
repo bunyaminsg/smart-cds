@@ -24,7 +24,7 @@
     "HbA1C": {
       "resourceType": "Observation",
       "type": "Quantity",
-      "unit": "%",
+      "unit": "mmol/mol",
       "min": 0,
       "max": 999
     },
@@ -43,14 +43,6 @@
       "max": 999
     },
     "HDL": {
-      "resourceType": "Observation",
-      "type": "Quantity",
-      "unit": "mmol/l",
-      "min": 0,
-      "max": 999
-    },
-
-    "NonHDL": {
       "resourceType": "Observation",
       "type": "Quantity",
       "unit": "mmol/l",
@@ -85,6 +77,25 @@
       "resourceType": "Condition",
       "type": "boolean",
       "selectDate": true
+    },
+    "CKD4_5": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "CKD Stage > 4"
+      }
+    },
+    "CVD": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "label": {
+        "en": "CVD"
+      }
+    },
+    "Atorvastatin": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean"
     }
   }
 }

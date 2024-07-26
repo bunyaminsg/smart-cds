@@ -7,6 +7,19 @@ import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper, UnitConceptEnum}
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, Period}
 
+/*
+This work utilizes the Advanced Cardiovascular Risk Model as described in the article
+"Advanced cardiovascular risk prediction in the emergency department: updating a clinical prediction model
+– a large database study protocol," which is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+License Link: CC BY 4.0
+
+Source: "Advanced cardiovascular risk prediction in the emergency department: updating a clinical prediction model
+– a large database study protocol." Published in Diagnostic and Prognostic Research.
+Available at: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3902381/
+
+ */
+
 object AdvanceFlowExecution {
   /**
    * Execute ADVANCE Calculation flow
@@ -19,17 +32,20 @@ object AdvanceFlowExecution {
    * @param ACR Albumin/Creatine Ratio Observation
    * @param TotalCholesterol Total Cholesterol Observation
    * @param HDL HDL Observation
-   * @param NonHDL NonHDL Observation
    * @param BP_SBP Systolic Blood Pressure Observation
    * @param BP_DBP Diastolic Blood Pressure Observation
    * @param Type1Diabetes Type 1 Diabetes Condition
    * @param Type2Diabetes Type 2 Diabetes Condition
+   * @param CKD4_5 Stage 4 or 5 Chronic Kidney Disease Condition
+   * @param CVD CVD Condition
+   * @param Atorvastatin Atorvastatin Medication
    * @param responseBuilder Response Builder
    * @return
    */
   def executionFlow(patient: Patient, AtrialFibrillation: Seq[Condition],Retinopathy: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
-                    HbA1C: Seq[Observation], ACR: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], NonHDL: Seq[Observation],
-                    BP_SBP: Seq[Observation], BP_DBP: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
+                    HbA1C: Seq[Observation], ACR: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation],
+                    BP_DBP: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], CKD4_5: Seq[Condition], CVD: Seq[Condition],
+                    Atorvastatin: Seq[MedicationStatement],responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
     val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
 
     val age = FhirParseHelper.getAge(patient)
@@ -39,27 +55,23 @@ object AdvanceFlowExecution {
     //If NonHDL cholesterol data exists, uses that data.
     //Otherwise, calculate the value from total cholesterol and HDL cholesterol
     var nonhdl = 0.0
-    if(checkExists(NonHDL) == 1){
-      val nonhdlObs = NonHDL.headOption
-      nonhdl = FhirParseHelper.getQuantityObservationValue(nonhdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-    } else {
-      var hdl= 0.0
-      if(checkExists(HDL)==1){
-        val hdlObs = HDL.headOption
-        hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-      } else {
-        hdl = 1.6
-      }
-      var cholesterol = 0.0
-      if(checkExists(TotalCholesterol) == 1){
-        val cholesterolObs = TotalCholesterol.headOption
-        cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
-      } else {
-        cholesterol = 5.17
-      }
 
-      nonhdl = cholesterol - hdl
+    var hdl= 0.0
+    if(checkExists(HDL)==1){
+      val hdlObs = HDL.headOption
+      hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+    } else {
+      hdl = 1.6
     }
+    var cholesterol = 0.0
+    if(checkExists(TotalCholesterol) == 1){
+      val cholesterolObs = TotalCholesterol.headOption
+      cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+    } else {
+      cholesterol = 5.17
+    }
+
+    nonhdl = cholesterol - hdl
 
     //Get Albumin/Creatine Ratio Observation
     var acr = 0.0
@@ -73,7 +85,8 @@ object AdvanceFlowExecution {
     if(checkExists(HbA1C) == 1){
       val hba1cObs = HbA1C.headOption
       hba1c = FhirParseHelper.getQuantityObservationValue(hba1cObs, Option(UnitConceptEnum.HBA1C)).get
-    } else {hba1c = 5.0}
+    } else {hba1c = 39}
+
 
 
     //Get blood pressure observations and calculate pulse pressure
@@ -181,9 +194,9 @@ object AdvanceFlowExecution {
 
     if(b_AF == 1) {sum += 2}
 
-    if(hba1c >= 9) {
+    if(hba1c >= 75) {
       sum += 2
-    } else if(hba1c >= 6) {
+    } else if(hba1c >= 42) {
       sum += 1
     }
 
@@ -195,6 +208,7 @@ object AdvanceFlowExecution {
       sum += 1
     }
 
+
     if(acr>30) {
       sum += 3
     } else if(acr >= 3){
@@ -202,16 +216,20 @@ object AdvanceFlowExecution {
     }
 
     //Get risk percentages corresponding to the accumulated risk points
-    val result = mapResult(sum)
+    val risk_score = mapResult(sum)
     val healthy_score = mapResult(healthy_sum)
 
 
     var output = responseBuilder
     output = output.withCard(_.loadCardWithPostTranslation("card-score",
       "effectiveDate" -> DateTimeUtil.zonedNow(),
-      "scoreValue" -> result,
+      "scoreValue" -> risk_score,
       "healthyValue" -> healthy_score
     ))
+
+    output = recommendReduceACRIfApplicable(ACR, output)
+    output = recommendReduceHBA1CIfApplicable(HbA1C, output)
+    output = recommendAtorvastatinIfApplicable(risk_score, Type2Diabetes, CKD4_5, CVD, Atorvastatin, HDL, TotalCholesterol, output)
     output
 
   }
@@ -248,5 +266,74 @@ object AdvanceFlowExecution {
       }
     }
     result
+  }
+
+  private def recommendReduceACRIfApplicable(ACR: Seq[Observation], output: CdsResponseBuilder) = {
+    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
+    if(checkExists(ACR) == 1){
+      val acr = FhirParseHelper.getQuantityObservationValue(ACR.headOption, Option(UnitConceptEnum.ACR)).get
+      if(acr > 30) {
+        output.withCard(_.loadCardWithPostTranslation("card-reduce-acr",
+          "effectiveDate" -> DateTimeUtil.zonedNow()
+        ))
+      } else {
+        output
+      }
+    } else {
+      output
+    }
+  }
+
+  private def recommendReduceHBA1CIfApplicable(HbA1C: Seq[Observation], output: CdsResponseBuilder) = {
+    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
+    if(checkExists(HbA1C) == 1){
+      val hba1c = FhirParseHelper.getQuantityObservationValue(HbA1C.headOption, Option(UnitConceptEnum.HBA1C)).get
+      if(hba1c >= 42) {
+        output.withCard(_.loadCardWithPostTranslation("card-reduce-hba1c",
+          "effectiveDate" -> DateTimeUtil.zonedNow()
+        ))
+      } else {
+        output
+      }
+    } else {
+      output
+    }
+  }
+
+  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Seq[Condition], ckd: Seq[Condition], cvd: Seq[Condition], atorvastatin: Seq[MedicationStatement],
+                                                hdl: Seq[Observation], cholesterol: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
+    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
+    if(checkExists(cholesterol) == 1 && checkExists(hdl) == 1){
+      val _cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterol.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
+      val _hdl = FhirParseHelper.getQuantityObservationValue(hdl.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
+      if((_cholesterol - _hdl)>3) {
+        val targetCholesterol = _cholesterol - ((_cholesterol - _hdl) * 0.4)
+        if (t2d.nonEmpty && ckd.isEmpty && atorvastatin.isEmpty) {
+          if (cvd.nonEmpty) {
+            output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
+              "effectiveDate" -> DateTimeUtil.zonedNow(),
+              "dose" -> 80,
+              "value" -> targetCholesterol
+            ))
+          } else if (riskScore > 10) {
+            output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
+              "effectiveDate" -> DateTimeUtil.zonedNow(),
+              "dose" -> 20,
+              "value" -> targetCholesterol
+            ))
+          } else {
+            output
+          }
+        } else {
+          output
+        }
+      } else {
+        output
+      }
+
+    } else {
+      output
+    }
+
   }
 }
