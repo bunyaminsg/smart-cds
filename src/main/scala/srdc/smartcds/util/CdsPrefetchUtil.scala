@@ -83,6 +83,20 @@ object CdsPrefetchUtil {
   }
 
   /**
+   * Determines the race using given prefetch
+   *
+   * @param prefetchKey
+   * @param fhirPathEvaluator
+   * @return race of the patient
+   */
+  def getRaceCategory(prefetchKey: String, fhirPathEvaluator: FhirPathEvaluator): String = {
+    fhirPathEvaluator.evaluateOptionalString(s"%cdsPrefetch.$prefetchKey.valueCodeableConcept.coding.code", JNothing) match {
+      case Some("LA6162-7") => "africanamerican"
+      case _ => "white"
+    }
+  }
+
+  /**
    * Calculates the age of the patient
    * @param fhirPathEvaluator
    * @return
