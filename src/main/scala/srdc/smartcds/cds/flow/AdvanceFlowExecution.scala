@@ -268,6 +268,13 @@ object AdvanceFlowExecution {
     result
   }
 
+  /**
+   * Recommends ACR Reduction if needed
+   *
+   * @param ACR Albumin/Creatine Ratio Observation
+   * @param output CdsResponseBuilder object
+   * @return output with updated card
+   */
   private def recommendReduceACRIfApplicable(ACR: Seq[Observation], output: CdsResponseBuilder) = {
     val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
     if(checkExists(ACR) == 1){
@@ -284,6 +291,14 @@ object AdvanceFlowExecution {
     }
   }
 
+
+  /**
+   * Recommends HbA1C Reduction if needed
+   *
+   * @param HbA1C HbA1C Observation
+   * @param output CdsResponseBuilder object
+   * @return output with updated card
+   */
   private def recommendReduceHBA1CIfApplicable(HbA1C: Seq[Observation], output: CdsResponseBuilder) = {
     val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
     if(checkExists(HbA1C) == 1){
@@ -300,6 +315,19 @@ object AdvanceFlowExecution {
     }
   }
 
+  /**
+   * Recommends ACR Reduction if needed
+   *
+   * @param riskScore Risk Score Calculated So Far
+   * @param t2d Type2Diabetes Observation
+   * @param ckd Stage 4 or 5 Chronic Kidney Disease Observation
+   * @param cvd CVD Observation
+   * @param atorvastatin Atorvastatin Medication
+   * @param hdl HDL Observation
+   * @param cholesterol TotalCholesterol Observation
+   * @param output CdsResponseBuilder object
+   * @return output with updated card
+   */
   private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Seq[Condition], ckd: Seq[Condition], cvd: Seq[Condition], atorvastatin: Seq[MedicationStatement],
                                                 hdl: Seq[Observation], cholesterol: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
     val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
