@@ -1,0 +1,45 @@
+{
+  "uuid": "QRISK3 REDUCE BP",
+  "summary": "Reduce Blood Pressure",
+  "indicator": "no-show",
+  "detail": "Control blood pressure (SBP = 120 mmHg)",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Control blood pressure (SBP = 120 mmHg)",
+      "uuid": "suggestion-reduce-bp",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic Blood Pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 120,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

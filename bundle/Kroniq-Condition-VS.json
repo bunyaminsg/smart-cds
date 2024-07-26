@@ -6605,7 +6605,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "status": "active",
-        "id": "CKD3-4-5",
+        "id": "CKD3_4_5",
         "compose": {
           "include": [
             {
@@ -15583,6 +15583,44 @@
       "resource": {
         "resourceType": "ValueSet",
         "status": "active",
+        "id": "Migraine",
+        "compose": {
+          "include": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "concept": [
+                {
+                  "code": "G43",
+                  "display": "Migraine",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Migraine"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Migraña"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Migräne"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Migrenă"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
         "id": "MildCognitiveImpairment",
         "compose": {
           "include": [
@@ -21289,6 +21327,132 @@
       "resource": {
         "resourceType": "ValueSet",
         "status": "active",
+        "id": "SevereMentalIllness",
+        "compose": {
+          "include": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "concept": [
+                {
+                  "code": "F20",
+                  "display": "Schizophrenia",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Schizophrenia"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Esquizofrenia"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Schizophrenie"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Schizofrenie"
+                    }
+                  ]
+                },
+                {
+                  "code": "F31",
+                  "display": "Bipolar affective disorder",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Bipolar affective disorder"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Desorden afectivo bipolar"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Bipolare affektive Störung"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Tulburare afectivă bipolară"
+                    }
+                  ]
+                },
+                {
+                  "code": "F32.1",
+                  "display": "Moderate depressive episode",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Moderate depressive episode"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Episodio depresivo moderado"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Mittelschwere depressive Episode"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Episod depresiv moderat"
+                    }
+                  ]
+                },
+                {
+                  "code": "F32.2",
+                  "display": "Severe depressive episode without psychotic symptoms",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Severe depressive episode without psychotic symptoms"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Episodio depresivo severo sin síntomas psicóticos."
+                    },
+                    {
+                      "language": "de",
+                      "value": "Schwere depressive Episode ohne psychotische Symptome"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Episod depresiv sever fără simptome psihotice"
+                    }
+                  ]
+                },
+                {
+                  "code": "F32.3",
+                  "display": "Severe depressive episode with psychotic symptoms",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Severe depressive episode with psychotic symptoms"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Episodio depresivo severo con síntomas psicóticos."
+                    },
+                    {
+                      "language": "de",
+                      "value": "Schwere depressive Episode mit psychotischen Symptomen"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Episod depresiv sever cu simptome psihotice"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
         "id": "SignificantComorbidity",
         "compose": {
           "include": [
@@ -26562,6 +26726,44 @@
                     {
                       "language": "tr",
                       "value": "Senkop ve çöküş"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
+        "id": "SystemicLupusErythematosus",
+        "compose": {
+          "include": [
+            {
+              "system":"http://hl7.org/fhir/sid/icd-10",
+              "concept": [
+                {
+                  "code": "M32",
+                  "display": "Systemic lupus erythematosus",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Systemic lupus erythematosus"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Social exclusion and rejection"
+                    },
+                    {
+                      "language": "de",
+                      "value": "Systemischer Lupus erythematodes"
+                    },
+                    {
+                      "language": "ro",
+                      "value": "Lupus eritematos sistemic"
                     }
                   ]
                 }

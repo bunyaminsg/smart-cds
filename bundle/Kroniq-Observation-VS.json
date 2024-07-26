@@ -11,6 +11,36 @@
       "resource": {
         "resourceType": "ValueSet",
         "status": "active",
+        "id": "Ethnicity",
+        "compose": {
+          "include": [
+            {
+              "system": "http://srdc.com.tr/custom",
+              "concept": [
+                {
+                  "code": "qrisk3-ethnicity",
+                  "display": "Ethnicity",
+                  "designation": [
+                    {
+                      "language": "en",
+                      "value": "Ethnicity"
+                    },
+                    {
+                      "language": "es",
+                      "value": "Etnicidad"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "status": "active",
         "id": "Region",
         "compose": {
           "include": [
