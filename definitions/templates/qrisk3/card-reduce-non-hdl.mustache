@@ -1,16 +1,16 @@
 {
-  "uuid": "QRISK3 REDUCE CHOLESTEROL",
-  "summary": "Reduce Total Cholesterol",
+  "uuid": "QRISK3 REDUCE NON-HDL",
+  "summary": "Reduce non-HDL Cholesterol",
   "indicator": "no-show",
-  "detail": "Control total cholesterol (Cholesterol = 200 mg/dL)",
+  "detail": "Reduce non-HDL cholesterol 40% using Atorvastatin ({{dose}}mg)",
   "source": {
     "label": "",
     "url": ""
   },
   "suggestions": [
     {
-      "label": "Control total cholesterol (Cholesterol = 200 mg/dL)",
-      "uuid": "suggestion-reduce-cholesterol",
+      "label": "Reduce non-HDL cholesterol 40% using Atorvastatin ({{dose}}mg)",
+      "uuid": "suggestion-reduce-non-hdl",
       "actions": [
         {
           "type": "create",
@@ -27,12 +27,12 @@
                 {
                   "system": "http://loinc.org",
                   "code": "2093-3",
-                  "display": "Cholesterol"
+                  "display": "Total Cholesterol"
                 }
               ]
             },
             "valueQuantity": {
-              "value": 200,
+              "value": {{value}},
               "unit": "mg/dL",
               "system": "http://unitsofmeasure.org",
               "code": "mg/dL"
