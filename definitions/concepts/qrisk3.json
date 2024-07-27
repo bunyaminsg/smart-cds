@@ -103,6 +103,17 @@
       "type": "boolean",
       "conceptId": "CVD",
       "label": "Family History of CVD"
+    },
+    "Atorvastatin": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean"
+    },
+    "CVD": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "label": {
+        "en": "CVD"
+      }
     }
   }
 }

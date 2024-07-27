@@ -23,6 +23,8 @@
     "ErectileDysfunction": "Condition?patient=Patient/{{context.patientId}}&code={{config.ErectileDysfunction}}&_count=1",
     "Migraine": "Condition?patient=Patient/{{context.patientId}}&code={{config.Migraine}}&_count=1",
     "Corticosteroids": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.Corticosteroids}}&_count=1",
-    "Ethnicity": "Observation?patient=Patient/{{context.patientId}}&code={{config.Ethnicity}}&_sort=-date&_count=1"
+    "Ethnicity": "Observation?patient=Patient/{{context.patientId}}&code={{config.Ethnicity}}&_sort=-date&_count=1",
+    "Atorvastatin": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.Atorvastatin}}&status=active&_count=1",
+    "CVD": "Condition?patient=Patient/{{context.patientId}}&code={{config.CVD}}&_count=1"
   }
 }
