@@ -66,6 +66,17 @@ object CdsPrefetchUtil {
   }
 
   /**
+   * Gets valueQuantity.value or component.valueQuantity.value for given concept in the given prefetch
+   * @param prefetchKey Prefetch key
+   * @param conceptId Concept ID to lookup the codes
+   * @param fhirPathEvaluator
+   * @return
+   */
+  def getObservationOrComponentSeqValue(prefetchKey: String, conceptId: String, fhirPathEvaluator: FhirPathEvaluator): Seq[Double] = {
+    fhirPathEvaluator.evaluateNumerical(CdsPrefetchUtil.observationOrComponentValuePath(prefetchKey, conceptId), JNothing).map(_.toDouble)
+  }
+
+  /**
    * Determines the smoking category using given prefetch
    * @param prefetchKey
    * @param fhirPathEvaluator
@@ -78,6 +89,27 @@ object CdsPrefetchUtil {
       case Some("LA18977-1"|"LA18982-1") => Some(SmokingCategoryEnum.LIGHT)
       case Some("LA18979-7"|"LA18976-3"|"449868002") => Some(SmokingCategoryEnum.DAILY)
       case Some("LA18981-3") => Some(SmokingCategoryEnum.HEAVY)
+      case _ => None
+    }
+  }
+
+  /**
+   * Determines the ethnicity of the patient
+   * @param prefetchKey
+   * @param fhirPathEvaluator
+   * @return Ethnicity Category in scale of 0 to 8 (0-White or not stated, 1-Indian, 2-Pakistani, 3-Bangladeshi, 4-Other Asian, 5-Black Caribbean, 6-Black African, 7-Chinese, 8-Other ethnic group)
+   */
+  def getEthnicityCategory(prefetchKey: String, fhirPathEvaluator: FhirPathEvaluator): Option[Int] = {
+    fhirPathEvaluator.evaluateOptionalString(s"%cdsPrefetch.$prefetchKey.valueCodeableConcept.coding.code", JNothing) match {
+      case Some("0") => Some(0)
+      case Some("1") => Some(1)
+      case Some("2") => Some(2)
+      case Some("3") => Some(3)
+      case Some("4") => Some(4)
+      case Some("5") => Some(5)
+      case Some("6") => Some(6)
+      case Some("7") => Some(7)
+      case Some("8") => Some(8)
       case _ => None
     }
   }
