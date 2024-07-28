@@ -28,27 +28,27 @@ object ACCAHAFlowExecution {
   /**
    * Executes ACC/AHA calculation service
    *
-   * @param age    Age of the patient
-   * @param gender Gender of the patient
-   * @param TotalCholesterol      Total Cholesterol Observation
-   * @param HDLCholesterol        HDL Observation
-   * @param SystolicBP            Blood Pressure Observation
-   * @param SmokingStatus         Smoking Status Observation
-   * @param Type1Diabetes         Type 1 Diabetes Condition
-   * @param Type2Diabetes         Type 2 Diabetes Condition
-   * @param HypertensiveTreatment Hypertensive Treatment Medication Statement
-   * @param Ethnicity             Ethnicity Observation for Patient
+   * @param age                   Age of the patient
+   * @param gender                Gender of the patient
+   * @param totalCholesterol      Total Cholesterol Observation
+   * @param hdlCholesterol        HDL Observation
+   * @param systolicBP            Blood Pressure Observation
+   * @param smokingStatus         Smoking Status Observation
+   * @param type1Diabetes         Type 1 Diabetes Condition
+   * @param type2Diabetes         Type 2 Diabetes Condition
+   * @param hypertensiveTreatment Hypertensive Treatment Medication Statement
+   * @param ethnicity             Ethnicity Observation for Patient
    * @param responseBuilder       Response Builder
    * @return if applicable, returns the related ACC/AHA Score Card as a pair, for patient and
    *         for healthy person of same gender, race and sex; else 'no-value'
    */
-  def executeFlow(age: Int, gender: String, TotalCholesterol: Option[Double], HDLCholesterol: Option[Double],
-                  SystolicBP: Option[Double], SmokingStatus: Option[Int], Type1Diabetes: Int, Type2Diabetes: Int,
-                  HypertensiveTreatment: Int, Ethnicity: String, responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
+  def executeFlow(age: Int, gender: String, totalCholesterol: Option[Double], hdlCholesterol: Option[Double],
+                  systolicBP: Option[Double], smokingStatus: Option[Int], type1Diabetes: Int, type2Diabetes: Int,
+                  hypertensiveTreatment: Int, ethnicity: String, responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
 
     var output = responseBuilder
-    val riskScores = calculateACCRisk(age, gender, TotalCholesterol, HDLCholesterol, SystolicBP, SmokingStatus,
-      Type1Diabetes, Type2Diabetes, HypertensiveTreatment, Ethnicity)
+    val riskScores = calculateACCRisk(age, gender, totalCholesterol, hdlCholesterol, systolicBP, smokingStatus,
+      type1Diabetes, type2Diabetes, hypertensiveTreatment, ethnicity)
 
     riskScores match {
       case Some((patientScore, healthyScore)) =>
@@ -57,8 +57,8 @@ object ACCAHAFlowExecution {
           "patientScoreValue" -> patientScore,
           "healthyScoreValue" -> healthyScore
         ))
-        output = recommendStopSmokingIfApplicable(SmokingStatus, output)
-        output = recommendReduceBPIfApplicable(SystolicBP, output)
+        output = recommendStopSmokingIfApplicable(smokingStatus, output)
+        output = recommendReduceBPIfApplicable(systolicBP, output)
     }
 
     output

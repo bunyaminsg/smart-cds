@@ -19,14 +19,14 @@ class ACCAHAService(cdsServiceContext: CdsServiceContext) extends BaseCdsService
       ACCAHAFlowExecution.executeFlow(
         age = CdsPrefetchUtil.getAge(fhirPathEvaluator),
         gender = fhirPathEvaluator.evaluateString(CdsPrefetchUtil.GENDER_PATH, JNothing).head,
-        TotalCholesterol = CdsPrefetchUtil.getObservationValue("TotalCholesterol", fhirPathEvaluator),
-        HDLCholesterol = CdsPrefetchUtil.getObservationValue("HDL", fhirPathEvaluator),
-        SystolicBP = CdsPrefetchUtil.getObservationOrComponentValue("BP_SBP", ConceptIdUtil.SYSTOLIC_BP, fhirPathEvaluator),
-        SmokingStatus = CdsPrefetchUtil.getSmokingCategory("SmokingStatus", fhirPathEvaluator),
-        Type1Diabetes = CdsPrefetchUtil.existsInt("Type1Diabetes", fhirPathEvaluator),
-        Type2Diabetes = CdsPrefetchUtil.existsInt("Type2Diabetes", fhirPathEvaluator),
-        HypertensiveTreatment = CdsPrefetchUtil.existsInt("HypertensiveTreatment", fhirPathEvaluator),
-        Ethnicity = CdsPrefetchUtil.getRaceCategory("Ethnicity", fhirPathEvaluator),
+        totalCholesterol = CdsPrefetchUtil.getObservationValue("TotalCholesterol", fhirPathEvaluator),
+        hdlCholesterol = CdsPrefetchUtil.getObservationValue("HDL", fhirPathEvaluator),
+        systolicBP = CdsPrefetchUtil.getObservationOrComponentValue("BP_SBP", ConceptIdUtil.SYSTOLIC_BP, fhirPathEvaluator),
+        smokingStatus = CdsPrefetchUtil.getSmokingCategory("SmokingStatus", fhirPathEvaluator),
+        type1Diabetes = CdsPrefetchUtil.existsInt("Type1Diabetes", fhirPathEvaluator),
+        type2Diabetes = CdsPrefetchUtil.existsInt("Type2Diabetes", fhirPathEvaluator),
+        hypertensiveTreatment = CdsPrefetchUtil.existsInt("HypertensiveTreatment", fhirPathEvaluator),
+        ethnicity = CdsPrefetchUtil.getRaceCategory("Ethnicity", fhirPathEvaluator),
         responseBuilder
       ).cdsResponse
     }
