@@ -187,6 +187,7 @@ object ACCAHAFlowExecution {
     val lnTotalCholesterol = log(totalCholesterol)
     val lnHDLCholesterol = log(hdlCholesterol)
     val lnSBP = log(sbp)
+    val smoke_cat = if (smoker > 1) 1 else 0
 
     val (coefLnAge, coefLnAgeSquared, coefLnTotalCholesterol, coefLnAgeLnTotalCholesterol, coefLnHDLCholesterol,
     coefLnAgeLnHDLCholesterol, coefLnTreatedSBP, coefLnAgeLnTreatedSBP, coefLnUntreatedSBP, coefLnAgeLnUntreatedSBP,
@@ -202,7 +203,7 @@ object ACCAHAFlowExecution {
         0.0, /* lnAge * lnTreatedSBP */
         1.809, /* lnUntreatedSBP */
         0.0, /* lnAge * lnUntreatedSBP */
-        if (smoker > 1) 0.549 else 0.0, /* smoker */
+        if (smoke_cat == 1) 0.549 else 0.0, /* smoker */
         0.0, /* lnAge * smoker */
         if (diabetes == 1) 0.645 else 0.0, // diabetes
         0.8954, /* baselineSurvival */
@@ -219,7 +220,7 @@ object ACCAHAFlowExecution {
         0.0, /* lnAge * lnTreatedSBP */
         1.764, /* lnUntreatedSBP */
         0.0, /* lnAge * lnUntreatedSBP */
-        if (smoker > 1) 7.837 else 0.0, // smoker
+        if (smoke_cat == 1) 7.837 else 0.0, // smoker
         -1.795, /* lnAge * smoker */
         if (diabetes == 1) 0.658 else 0.0, // diabetes
         0.9144, /* baselineSurvival */
@@ -237,7 +238,7 @@ object ACCAHAFlowExecution {
       (if (treatedHypertension == 1) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
       (if (treatedHypertension == 1) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
-      coefLnAgeSmoker * lnAge * smoker +
+      coefLnAgeSmoker * lnAge * smoke_cat +
       diabetesCoefficient
 
     100 * (1 - pow(baselineSurvival, exp(lnSum - mean)))
@@ -268,6 +269,7 @@ object ACCAHAFlowExecution {
     val lnTotalCholesterol = log(totalCholesterol)
     val lnHDLCholesterol = log(hdlCholesterol)
     val lnSBP = log(sbp)
+    val smoke_cat = if (smoker > 1) 1 else 0
 
     val (coefLnAge, coefLnAgeSquared, coefLnTotalCholesterol, coefLnAgeLnTotalCholesterol, coefLnHDLCholesterol,
     coefLnAgeLnHDLCholesterol, coefLnTreatedSBP, coefLnAgeLnTreatedSBP, coefLnUntreatedSBP, coefLnAgeLnUntreatedSBP,
@@ -283,7 +285,7 @@ object ACCAHAFlowExecution {
         -6.432, /* lnAge * lnTreatedSBP */
         27.820, /* lnUntreatedSBP */
         -6.087, /* lnAge * lnUntreatedSBP */
-        if (smoker > 1) 0.691 else 0.0, /* smoker */
+        if (smoke_cat == 1) 0.691 else 0.0, /* smoker */
         0.0, /* lnAge * smoker */
         if (diabetes == 1) 0.874 else 0.0, /* diabetes */
         0.9533, /* baselineSurvival */
@@ -300,7 +302,7 @@ object ACCAHAFlowExecution {
         0.0, /* lnAge * lnTreatedSBP */
         1.957, /* lnUntreatedSBP */
         0.0, /* lnAge * lnUntreatedSBP */
-        if (smoker > 1) 7.574 else 0.0, /* smoker */
+        if (smoke_cat == 1) 7.574 else 0.0, /* smoker */
         -1.665, /* lnAge * smoker */
         if (diabetes == 1) 0.661 else 0.0, /* diabetes */
         0.9665, /* baselineSurvival */
@@ -318,7 +320,7 @@ object ACCAHAFlowExecution {
       (if (treatedHypertension != 0) coefLnTreatedSBP else coefLnUntreatedSBP) * lnSBP +
       (if (treatedHypertension != 0) coefLnAgeLnTreatedSBP else coefLnAgeLnUntreatedSBP) * lnAge * lnSBP +
       smokerCoefficient +
-      coefLnAgeSmoker * lnAge * smoker +
+      coefLnAgeSmoker * lnAge * smoke_cat +
       diabetesCoefficient
 
     100 * (1 - pow(baselineSurvival, exp(lnSum - mean)))
