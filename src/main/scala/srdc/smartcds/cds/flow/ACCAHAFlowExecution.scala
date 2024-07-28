@@ -208,7 +208,7 @@ object ACCAHAFlowExecution {
         0.8954, /* baselineSurvival */
         19.54 /* mean */
       )
-      case _ => (
+      case "white" => (
         12.344, /* lnAge */
         0.0, /* lnAgeSquared */
         11.853, /* lnTotalCholesterol */
@@ -289,7 +289,7 @@ object ACCAHAFlowExecution {
         0.9533, /* baselineSurvival */
         86.61 /* mean */
       )
-      case _ => (
+      case "white" => (
         -29.799, /* lnAge */
         4.884, /* lnAgeSquared */
         13.540, /* lnTotalCholesterol */
