@@ -89,11 +89,6 @@ object ACCAHAFlowExecution {
    * @return whether or not patient should stop smoking
    */
   private def recommendStopSmokingIfApplicable(SmokingStatus: Option[Int], output: CdsResponseBuilder): CdsResponseBuilder = {
-    /*
-    I modified the condition because my algorithm only cares whether you
-    smoke or not, and my determineSmokingStatus function returns 1 if patient
-    is considered a smoker and 0 otherwise.
-    */
     if (SmokingStatus.get >= SmokingCategoryEnum.LIGHT) {
       output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
         "effectiveDate" -> DateTimeUtil.zonedNow()
@@ -114,46 +109,46 @@ object ACCAHAFlowExecution {
   /**
    * Validates given prefetch and returns the ACC/AHA risk score
    *
-   * @param age    Age of patient
-   * @param gender Gender of patient
-   * @param TotalCholesterol      Total Cholesterol Observation
-   * @param HDLCholesterol        HDL Observation
-   * @param SystolicBP            Blood Pressure Observation
-   * @param SmokingStatus         Smoking Status Observation
-   * @param Type1Diabetes         Type 1 Diabetes Condition
-   * @param Type2Diabetes         Type 2 Diabetes Condition
-   * @param HypertensiveTreatment Hypertensive Treatment Medication Statement
-   * @param Ethnicity             Ethnicity Observation for Patient
+   * @param age                   Age of patient
+   * @param gender                Gender of patient
+   * @param cholesterolOpt        Total Cholesterol Observation
+   * @param hdlOpt                HDL Observation
+   * @param sbpOpt                Blood Pressure Observation
+   * @param smokingCategory       Smoking Status Observation
+   * @param type1Diabetes         Type 1 Diabetes Condition
+   * @param type2Diabetes         Type 2 Diabetes Condition
+   * @param hypertensiveTreatment Hypertensive Treatment Medication Statement
+   * @param ethnicity             Ethnicity Observation for Patient
    * @return A double tuple consisting of patient's risk score and healthy score of a hypothetical
    *         patient with same age, sex, gender, but with optimal health parameters
    */
-  private def calculateACCRisk(age: Int, gender: String, TotalCholesterol: Option[Double], HDLCholesterol: Option[Double],
-                               SystolicBP: Option[Double], SmokingStatus: Option[Int], Type1Diabetes: Int, Type2Diabetes: Int,
-                               HypertensiveTreatment: Int, Ethnicity: String): Option[(Double, Double)] = {
+  private def calculateACCRisk(age: Int, gender: String, cholesterolOpt: Option[Double], hdlOpt: Option[Double],
+                               sbpOpt: Option[Double], smokingCategory: Option[Int], type1Diabetes: Int, type2Diabetes: Int,
+                               hypertensiveTreatment: Int, ethnicity: String): Option[(Double, Double)] = {
 
-    if (TotalCholesterol.isEmpty || HDLCholesterol.isEmpty || SystolicBP.isEmpty) {
+    if (cholesterolOpt.isEmpty || hdlOpt.isEmpty || sbpOpt.isEmpty) {
       println("Missing required data for ACC/AHA Risk Score calculation.")
       return None
     }
 
     /* Get related information about the patient */
-    val diabetes = Type1Diabetes | Type2Diabetes
-    val treatedHypertension = HypertensiveTreatment
+    val diabetes = type1Diabetes | type2Diabetes
+    val treatedHypertension = hypertensiveTreatment
 
-    val totalCholesterolOpt = TotalCholesterol.get
-    val hdlCholesterolOpt = HDLCholesterol.get
-    val systolicBPOpt = SystolicBP.get
-    val smokingObs = SmokingStatus.get
+    val totalCholesterol = cholesterolOpt.get
+    val hdlCholesterol = hdlOpt.get
+    val systolicBP = sbpOpt.get
+    val smoking = smokingCategory.get
 
     if (gender == "male") {
-      val patientScore = calculateACCRiskM(age, totalCholesterolOpt, hdlCholesterolOpt, systolicBPOpt, smokingObs, diabetes, treatedHypertension, Ethnicity)
-      val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, Ethnicity) /* Ideal parameters for male patients */
+      val patientScore = calculateACCRiskM(age, totalCholesterol, hdlCholesterol, systolicBP, smoking, diabetes, treatedHypertension, ethnicity)
+      val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, ethnicity) /* Ideal parameters for male patients of same age and race */
       Some(patientScore, healthyScore)
     }
 
     else if (gender == "female") {
-      val patientScore = calculateACCRiskF(age, totalCholesterolOpt, hdlCholesterolOpt, systolicBPOpt, smokingObs, diabetes, treatedHypertension, Ethnicity)
-      val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, Ethnicity) /* Ideal parameters for female patients */
+      val patientScore = calculateACCRiskF(age, totalCholesterol, hdlCholesterol, systolicBP, smoking, diabetes, treatedHypertension, ethnicity)
+      val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, ethnicity) /* Ideal parameters for female patients of same age and race */
       Some(patientScore, healthyScore)
     }
 
