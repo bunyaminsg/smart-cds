@@ -126,7 +126,7 @@ object ACCAHAFlowExecution {
                                sbpOpt: Option[Double], smokingCategory: Option[Int], type1Diabetes: Int, type2Diabetes: Int,
                                hypertensiveTreatment: Int, ethnicity: String): Option[(Double, Double)] = {
 
-    if (cholesterolOpt.isEmpty || hdlOpt.isEmpty || sbpOpt.isEmpty) {
+    if (cholesterolOpt.isEmpty || hdlOpt.isEmpty || sbpOpt.isEmpty || smokingCategory.isEmpty) {
       println("Missing required data for ACC/AHA Risk Score calculation.")
       return None
     }
