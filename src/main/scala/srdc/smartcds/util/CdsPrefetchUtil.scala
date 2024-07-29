@@ -3,7 +3,7 @@ package srdc.smartcds.util
 import io.onfhir.path.FhirPathEvaluator
 import org.json4s.JNothing
 
-import java.time.{LocalDate, Period}
+import java.time.{LocalDate, Period, ZonedDateTime}
 
 /**
  * Helper utilities to obtain required values from the CDS prefetch
@@ -15,6 +15,7 @@ object CdsPrefetchUtil {
   final val GENDER_PATH = "%cdsPrefetch.patient.gender"
 
   /** FHIR Paths for specific fields */
+  private def conditionOnSetDateTimePath(prefetchKey: String)  = s"%cdsPrefetch.$prefetchKey.onsetDateTime"
   private def observationValuePath(prefetchKey: String) = s"%cdsPrefetch.$prefetchKey.valueQuantity.value"
   private def existsPath(prefetchKey: String) = s"%cdsPrefetch.$prefetchKey.exists()"
   private def observationOrComponentValuePath(prefetchKey: String, conceptId: String): String = {
@@ -90,6 +91,16 @@ object CdsPrefetchUtil {
   def getAge(fhirPathEvaluator: FhirPathEvaluator): Int = {
     val dob = fhirPathEvaluator.evaluateDateTime(CdsPrefetchUtil.DATE_OF_BIRTH_PATH, JNothing).head.asInstanceOf[LocalDate]
     Period.between(dob, LocalDate.now()).getYears
+  }
+
+  def getConditionDuration(prefetchKey: String, fhirPathEvaluator: FhirPathEvaluator): Option[Int] = {
+    val dob = fhirPathEvaluator.evaluateOptionalDateTime(CdsPrefetchUtil.conditionOnSetDateTimePath(prefetchKey), JNothing)
+    if(dob.isEmpty) {
+      return None
+    } else {
+      val localDate = dob.get.asInstanceOf[ZonedDateTime].toLocalDate
+      Option(Period.between(localDate, LocalDate.now()).getYears)
+    }
   }
 
 }
