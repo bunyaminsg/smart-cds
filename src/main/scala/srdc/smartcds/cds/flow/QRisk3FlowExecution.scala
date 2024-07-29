@@ -203,48 +203,6 @@ object QRisk3FlowExecution {
   }
 
   /**
-   *
-   * @param ethnicity Ethnicity of the patient represented by an integer
-   * @param gender Gender of the patient
-   * @return Returns the default BMI value for a specific gender and ethnicity
-   */
-  private def defaultBmiCalc(ethnicity: Int, gender: String): Double = {
-    ethnicity match {
-      case 0 =>
-        if(gender == "male") {27.1}
-        else{27.5}
-      case 1 =>
-        if(gender == "male"){25.3}
-        else{26.6}
-      case 2 =>
-        if(gender == "male"){26.2}
-        else{28.3}
-      case 3 =>
-        if(gender == "male"){24.9}
-        else{27}
-      case 4 =>
-        if(gender == "male"){25.4}
-        else{25.8}
-      case 5 =>
-        if(gender == "male"){26.7}
-        else{29.1}
-      case 6 =>
-        if(gender == "male"){26.3  }
-        else{29.5}
-      case 7 =>
-        if(gender == "male"){23.8}
-        else{23.9}
-      case 8 =>
-        if(gender == "male"){26.3}
-        else{27.5}
-      case _ =>
-        if(gender == "male"){27.1}
-        else{27.5}
-    }
-  }
-
-
-  /**
    * Validates given prefetch and returns the QRISK3 score
    */
   def calculateQRisk(age: Int, gender: String, b_AF: Int, b_ra: Int, b_renal: Int, b_type1: Int, b_type2: Int, b_treatedhyp: Int,
@@ -254,16 +212,16 @@ object QRisk3FlowExecution {
                      ethnicity: Option[Int]): Option[(Double, Double)] = {
 
     /* Checking if smokingCategory and Ethnicity of the patient is supplied */
-    if (smokingCategory.isEmpty || ethnicity.isEmpty) {
-      println("Smoking or Ethnicity not found")
+    if (smokingCategory.isEmpty || ethnicity.isEmpty || bmiOpt.isEmpty || cholesterolOpt.isEmpty || sbpOpt.isEmpty || hdlOpt.isEmpty) {
+      println("Required inputs are not found")
       return None
     }
 
     /* Setting up the inputs of the algorithm */
-    val bmi = if(bmiOpt.isDefined) {bmiOpt.get} else {defaultBmiCalc(ethnicity.get, gender)}
-    val cholesterol = if(cholesterolOpt.isDefined) { cholesterolOpt.get} else {200}
-    val hdl = if(hdlOpt.isDefined) {hdlOpt.get} else {60}
-    val sbp = if(sbpOpt.nonEmpty) {sbpOpt.head} else {125}
+    val bmi = bmiOpt.get
+    val cholesterol = cholesterolOpt.get
+    val hdl = hdlOpt.get
+    val sbp = sbpOpt.head
     val sbpStd: Double = sbpStdDevCalc(sbpOpt)
     val rati: Double = cholesterol / hdl
     val smoke_cat = smokingCategory.get
