@@ -9,12 +9,14 @@ import scala.math.{exp, log, pow}
 
 This implementation of the algorithm is based on the guidelines provided in the following publication:
 
-Goff DC Jr, Lloyd-Jones DM, Bennett G, Coady S, D’Agostino RB Sr, Gibbons R, Greenland P, Lackland DT, Levy D, O’Donnell CJ,
-Robinson JG, Schwartz JS, Shero ST, Smith SC Jr, Sorlie P, Stone NJ, Wilson PWF.
-2013 ACC/AHA guideline on the assessment of cardiovascular risk: a report of the American College of Cardiology/American Heart Association Task Force on
+Goff DC Jr, Lloyd-Jones DM, Bennett G, Coady S, D’Agostino RB Sr, Gibbons R, Greenland P,
+Lackland DT, Levy D, O’Donnell CJ, Robinson JG, Schwartz JS, Shero ST, Smith SC Jr, Sorlie P, Stone NJ, Wilson PWF.
+2013 ACC/AHA guideline on the assessment of cardiovascular risk: a report of the
+American College of Cardiology/American Heart Association Task Force on
 Practice Guidelines. Circulation. 2014;129(suppl 2):S49-S73.
 
-© 2013 The Expert Work Group Members. This work is licensed under the Creative Commons Attribution Non-Commercial-NoDerivs License.
+© 2013 The Expert Work Group Members.
+This work is licensed under the Creative Commons Attribution Non-Commercial-NoDerivs License.
 You may not use this work for commercial purposes, and you may not modify this work.
 For any use, distribution, and reproduction in any medium, you must properly cite the original work.
 
@@ -141,14 +143,20 @@ object ACCAHAFlowExecution {
     val smoking = smokingCategory.get
 
     if (gender == "male") {
-      val patientScore = calculateACCRiskM(age, totalCholesterol, hdlCholesterol, systolicBP, smoking, diabetes, treatedHypertension, ethnicity)
-      val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, ethnicity) /* Ideal parameters for male patients of same age and race */
+      val patientScore = calculateACCRiskM(age, totalCholesterol, hdlCholesterol, systolicBP,
+        smoking, diabetes, treatedHypertension, ethnicity)
+
+      /* Calculate healthy score with ideal parameters for male patients of same age and race */
+      val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, ethnicity)
       Some(patientScore, healthyScore)
     }
 
     else if (gender == "female") {
-      val patientScore = calculateACCRiskF(age, totalCholesterol, hdlCholesterol, systolicBP, smoking, diabetes, treatedHypertension, ethnicity)
-      val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, ethnicity) /* Ideal parameters for female patients of same age and race */
+      val patientScore = calculateACCRiskF(age, totalCholesterol, hdlCholesterol, systolicBP,
+        smoking, diabetes, treatedHypertension, ethnicity)
+
+      /* Calculate healthy score with ideal parameters for female patients of same age and race */
+      val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, ethnicity)
       Some(patientScore, healthyScore)
     }
 
@@ -176,7 +184,8 @@ object ACCAHAFlowExecution {
 
     /* Log patient params for easier debugging */
     println(s"Calculating ACC Risk for male with values: age=$age, totalCholesterol=$totalCholesterol," +
-      s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes, treatedHypertension=$treatedHypertension, race=$race")
+      s"hdlCholesterol=$hdlCholesterol, sbp=$sbp, smoker=$smoker, diabetes=$diabetes," +
+      s"treatedHypertension=$treatedHypertension, race=$race")
 
     val lnAge = log(age)
     val lnTotalCholesterol = log(totalCholesterol)
