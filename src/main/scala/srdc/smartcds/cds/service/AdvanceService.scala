@@ -2,9 +2,9 @@ package srdc.smartcds.cds.service
 
 import io.onfhir.cds.api.model.CdsResponse
 import io.onfhir.cds.service.{BaseCdsService, CdsServiceContext, CdsServiceRequest}
-import org.json4s.DefaultFormats
+import org.json4s.{DefaultFormats, JNothing}
 import srdc.smartcds.cds.flow.AdvanceFlowExecution
-import srdc.smartcds.model.fhir.{Condition, MedicationStatement, Observation, Patient}
+import srdc.smartcds.util.{CdsPrefetchUtil, ConceptIdUtil}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -12,26 +12,31 @@ class AdvanceService(cdsServiceContext: CdsServiceContext) extends BaseCdsServic
   implicit val formats: DefaultFormats.type = DefaultFormats
 
   override def executeCds(cdsServiceRequest: CdsServiceRequest)(implicit ex: ExecutionContext): Future[CdsResponse] = {
-    val patient = cdsServiceRequest.prefetches.get("patient").head.head.extract[Patient]
-    val AtrialFibrillation = cdsServiceRequest.prefetches.get("AtrialFibrillation").head.map(res => res.extract[Condition])
-    val Retinopathy = cdsServiceRequest.prefetches.get("Retinopathy").head.map(res => res.extract[Condition])
-    val HypertensiveTreatment = cdsServiceRequest.prefetches.get("HypertensiveTreatment").head.map(res => res.extract[MedicationStatement])
-    val HbA1C = cdsServiceRequest.prefetches.get("HbA1C").head.map(res => res.extract[Observation])
-    val ACR = cdsServiceRequest.prefetches.get("ACR").head.map(res => res.extract[Observation])
-    val TotalCholesterol = cdsServiceRequest.prefetches.get("TotalCholesterol").head.map(res => res.extract[Observation])
-    val HDL = cdsServiceRequest.prefetches.get("HDL").head.map(res => res.extract[Observation])
-    val BP_SBP = cdsServiceRequest.prefetches.get("BP_SBP").head.map(res => res.extract[Observation])
-    val BP_DBP = cdsServiceRequest.prefetches.get("BP_DBP").head.map(res => res.extract[Observation])
-    val Type1Diabetes = cdsServiceRequest.prefetches.get("Type1Diabetes").head.map(res => res.extract[Condition])
-    val Type2Diabetes = cdsServiceRequest.prefetches.get("Type2Diabetes").head.map(res => res.extract[Condition])
-    val CKD4_5 = cdsServiceRequest.prefetches.get("CKD4_5").head.map(res => res.extract[Condition])
-    val CVD = cdsServiceRequest.prefetches.get("CVD").head.map(res => res.extract[Condition])
-    val Atorvastatin = cdsServiceRequest.prefetches.get("Atorvastatin").head.map(res => res.extract[MedicationStatement])
-
+    val fhirPathEvaluator = getFhirPathEvaluator(cdsServiceRequest)
     val responseBuilder = createResponse(cdsServiceRequest)
+
     Future{
-      AdvanceFlowExecution.executionFlow(patient, AtrialFibrillation, Retinopathy, HypertensiveTreatment,
-        HbA1C, ACR, TotalCholesterol, HDL, BP_SBP, BP_DBP, Type1Diabetes, Type2Diabetes, CKD4_5, CVD, Atorvastatin,  responseBuilder).cdsResponse
+      AdvanceFlowExecution.executionFlow(
+        age = CdsPrefetchUtil.getAge(fhirPathEvaluator),
+        gender = fhirPathEvaluator.evaluateString(CdsPrefetchUtil.GENDER_PATH, JNothing).head,
+        atrialFibrillation = CdsPrefetchUtil.exists("AtrialFibrillation", fhirPathEvaluator),
+        retinopathy = CdsPrefetchUtil.exists("Retinopathy", fhirPathEvaluator),
+        hypertensiveTreatment = CdsPrefetchUtil.exists("HypertensiveTreatment", fhirPathEvaluator),
+        hba1cOpt = CdsPrefetchUtil.getObservationValue("HbA1C", fhirPathEvaluator),
+        acrOpt = CdsPrefetchUtil.getObservationValue("ACR", fhirPathEvaluator),
+        totalCholesterolOpt = CdsPrefetchUtil.getObservationValue("TotalCholesterol", fhirPathEvaluator),
+        hdlOpt = CdsPrefetchUtil.getObservationValue("HDL", fhirPathEvaluator),
+        sbpOpt = CdsPrefetchUtil.getObservationOrComponentValue("BP_SBP", ConceptIdUtil.SYSTOLIC_BP, fhirPathEvaluator),
+        dbpOpt = CdsPrefetchUtil.getObservationOrComponentValue("BP_DBP", ConceptIdUtil.DIASTOLIC_BP, fhirPathEvaluator),
+        type1Diabetes = CdsPrefetchUtil.exists("Type1Diabetes", fhirPathEvaluator),
+        type2Diabetes = CdsPrefetchUtil.exists("Type2Diabetes", fhirPathEvaluator),
+        type1DiabetesDuration = CdsPrefetchUtil.getConditionDuration("Type1Diabetes", fhirPathEvaluator),
+        type2DiabetesDuration = CdsPrefetchUtil.getConditionDuration("Type2Diabetes", fhirPathEvaluator),
+        ckd45 = CdsPrefetchUtil.exists("CKD4_5", fhirPathEvaluator),
+        cvd = CdsPrefetchUtil.exists("CVD", fhirPathEvaluator),
+        atorvastatin = CdsPrefetchUtil.exists("Atorvastatin", fhirPathEvaluator),
+        responseBuilder
+      ).cdsResponse
     }
   }
 }

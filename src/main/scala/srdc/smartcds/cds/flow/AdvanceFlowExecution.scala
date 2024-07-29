@@ -1,11 +1,8 @@
 package srdc.smartcds.cds.flow
 
 import io.onfhir.cds.model.CdsResponseBuilder
-import srdc.smartcds.model.fhir._
-import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper, UnitConceptEnum}
+import srdc.smartcds.util.DateTimeUtil
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, Period}
 
 /*
 This work utilizes the Advanced Cardiovascular Risk Model as described in the article
@@ -24,49 +21,48 @@ object AdvanceFlowExecution {
   /**
    * Execute ADVANCE Calculation flow
    *
-   * @param patient Patient resource
-   * @param AtrialFibrillation Atrial Fibrillation Condition
-   * @param Retinopathy Retinopathy Condition
-   * @param HypertensiveTreatment Hypertensive Treatment Medication
-   * @param HbA1C HbA1C Observation
-   * @param ACR Albumin/Creatine Ratio Observation
-   * @param TotalCholesterol Total Cholesterol Observation
-   * @param HDL HDL Observation
-   * @param BP_SBP Systolic Blood Pressure Observation
-   * @param BP_DBP Diastolic Blood Pressure Observation
-   * @param Type1Diabetes Type 1 Diabetes Condition
-   * @param Type2Diabetes Type 2 Diabetes Condition
-   * @param CKD4_5 Stage 4 or 5 Chronic Kidney Disease Condition
-   * @param CVD CVD Condition
-   * @param Atorvastatin Atorvastatin Medication
-   * @param responseBuilder Response Builder
+   * @param age
+   * @param gender
+   * @param atrialFibrillation
+   * @param retinopathy
+   * @param hypertensiveTreatment
+   * @param hba1cOpt
+   * @param acrOpt
+   * @param totalCholesterolOpt
+   * @param hdlOpt
+   * @param sbpOpt
+   * @param dbpOpt
+   * @param type1Diabetes
+   * @param type2Diabetes
+   * @param type1DiabetesDuration
+   * @param type2DiabetesDuration
+   * @param ckd45
+   * @param cvd
+   * @param atorvastatin
+   * @param responseBuilder
    * @return
    */
-  def executionFlow(patient: Patient, AtrialFibrillation: Seq[Condition],Retinopathy: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
-                    HbA1C: Seq[Observation], ACR: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation],
-                    BP_DBP: Seq[Observation], Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], CKD4_5: Seq[Condition], CVD: Seq[Condition],
-                    Atorvastatin: Seq[MedicationStatement],responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
 
-    val age = FhirParseHelper.getAge(patient)
-    val isFemale = patient.gender.contains("female")
+  def executionFlow(age: Int, gender: String, atrialFibrillation: Boolean,retinopathy: Boolean, hypertensiveTreatment: Boolean,
+                    hba1cOpt: Option[Double], acrOpt: Option[Double], totalCholesterolOpt: Option[Double], hdlOpt: Option[Double],
+                    sbpOpt: Option[Double], dbpOpt: Option[Double], type1Diabetes: Boolean, type2Diabetes: Boolean, type1DiabetesDuration: Option[Int],
+                    type2DiabetesDuration: Option[Int], ckd45: Boolean, cvd: Boolean, atorvastatin: Boolean,
+                    responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
+
+    val isFemale = (gender == "female")
 
 
-    //If NonHDL cholesterol data exists, uses that data.
-    //Otherwise, calculate the value from total cholesterol and HDL cholesterol
     var nonhdl = 0.0
 
     var hdl= 0.0
-    if(checkExists(HDL)==1){
-      val hdlObs = HDL.headOption
-      hdl = FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+    if(hdlOpt.isDefined){
+      hdl = hdlOpt.get
     } else {
       hdl = 1.6
     }
     var cholesterol = 0.0
-    if(checkExists(TotalCholesterol) == 1){
-      val cholesterolObs = TotalCholesterol.headOption
-      cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get
+    if(totalCholesterolOpt.isDefined){
+      cholesterol = totalCholesterolOpt.get
     } else {
       cholesterol = 5.17
     }
@@ -75,27 +71,23 @@ object AdvanceFlowExecution {
 
     //Get Albumin/Creatine Ratio Observation
     var acr = 0.0
-    if(checkExists(ACR) == 1){
-      val acrObs = ACR.headOption
-      acr = FhirParseHelper.getQuantityObservationValue(acrObs, Option(UnitConceptEnum.ACR)).get
+    if(acrOpt.isDefined){
+      acr = acrOpt.get
     } else {acr = 2.0}
 
     //Get Hba1c Observation
     var hba1c = 0.0
-    if(checkExists(HbA1C) == 1){
-      val hba1cObs = HbA1C.headOption
-      hba1c = FhirParseHelper.getQuantityObservationValue(hba1cObs, Option(UnitConceptEnum.HBA1C)).get
+    if(hba1cOpt.isDefined){
+      hba1c = hba1cOpt.get
     } else {hba1c = 39}
 
 
 
     //Get blood pressure observations and calculate pulse pressure
-    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
-    val dbpOpt = FhirParseHelper.getDiastolicBP(BP_DBP)
     var sbp = 120.0
     var dbp = 80.0
     if(sbpOpt.isDefined){
-       sbp = sbpOpt.get
+      sbp = sbpOpt.get
     }
     if(dbpOpt.isDefined) {
       dbp = dbpOpt.get
@@ -103,34 +95,44 @@ object AdvanceFlowExecution {
     val pulse_p = sbp - dbp
 
     //Get boolean type parameters
-    val b_AF = checkExists(AtrialFibrillation)
-    val b_treatedhyp = checkExists(HypertensiveTreatment)
-    val b_R = checkExists(Retinopathy)
+
 
 
     //Get diabetes observation and calculate diabetes duration and age
     var diabetes_duration = -1
     var diabetes_age = 0
-    if(checkExists(Type1Diabetes) == 1 && checkExists(Type2Diabetes) == 1){
-      val type1DiabetesDuration = Period.between(LocalDate.parse(Type1Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
-      val type2DiabetesDuration = Period.between(LocalDate.parse(Type2Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
-      if( type1DiabetesDuration > type2DiabetesDuration) {
-        diabetes_duration = type1DiabetesDuration
+    if(type1Diabetes && type2Diabetes){
+      var type1_duration = 0
+      var type2_duration = 0
+      if(type1DiabetesDuration.isDefined){
+        type1_duration = type1DiabetesDuration.get
+      }
+      if(type2DiabetesDuration.isDefined){
+        type2_duration = type2DiabetesDuration.get
+      }
+      if( type1_duration > type2_duration) {
+        diabetes_duration = type1_duration
       } else {
-        diabetes_duration = type2DiabetesDuration
+        diabetes_duration = type2_duration
       }
       diabetes_age = age - diabetes_duration
     }
-    else if(checkExists(Type1Diabetes) == 1){
-      diabetes_duration = Period.between(LocalDate.parse(Type1Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
+    else if(type1Diabetes){
+      if(type1DiabetesDuration.isDefined){
+        diabetes_duration = type1DiabetesDuration.get
+      } else {
+        diabetes_duration = 0
+      }
       diabetes_age = age - diabetes_duration
     }
-    else if(checkExists(Type2Diabetes) == 1) {
-      diabetes_duration = Period.between(LocalDate.parse(Type2Diabetes.head.onsetDateTime.get.split("T")(0), DateTimeFormatter.ofPattern("yyyy-MM-dd")), LocalDate.now()).getYears
+    else if(type2Diabetes) {
+      if(type2DiabetesDuration.isDefined){
+        diabetes_duration = type2DiabetesDuration.get
+      } else {
+        diabetes_duration = 0
+      }
       diabetes_age = age - diabetes_duration
     }
-
-
 
 
     //Initialize point summations
@@ -144,7 +146,7 @@ object AdvanceFlowExecution {
     if(diabetes_age<=34) {
       score = 0
     } else {
-        score = diabetes_age match {
+      score = diabetes_age match {
         case x if 35 to 39 contains x => 1
         case x if 40 to 44 contains x => 2
         case x if 45 to 50 contains x => 3
@@ -188,11 +190,11 @@ object AdvanceFlowExecution {
       sum += 1
     }
 
-    if(b_R == 1) {sum += 1}
+    if(retinopathy) {sum += 1}
 
-    if(b_treatedhyp == 1) {sum += 1}
+    if(hypertensiveTreatment) {sum += 1}
 
-    if(b_AF == 1) {sum += 2}
+    if(atrialFibrillation) {sum += 2}
 
     if(hba1c >= 75) {
       sum += 2
@@ -227,9 +229,9 @@ object AdvanceFlowExecution {
       "healthyValue" -> healthy_score
     ))
 
-    output = recommendReduceACRIfApplicable(ACR, output)
-    output = recommendReduceHBA1CIfApplicable(HbA1C, output)
-    output = recommendAtorvastatinIfApplicable(risk_score, Type2Diabetes, CKD4_5, CVD, Atorvastatin, HDL, TotalCholesterol, output)
+    output = recommendReduceACRIfApplicable(acrOpt, output)
+    output = recommendReduceHBA1CIfApplicable(hba1cOpt, output)
+    output = recommendAtorvastatinIfApplicable(risk_score, type2Diabetes, ckd45, cvd, atorvastatin, hdlOpt, totalCholesterolOpt, output)
     output
 
   }
@@ -275,10 +277,9 @@ object AdvanceFlowExecution {
    * @param output CdsResponseBuilder object
    * @return output with updated card
    */
-  private def recommendReduceACRIfApplicable(ACR: Seq[Observation], output: CdsResponseBuilder) = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
-    if(checkExists(ACR) == 1){
-      val acr = FhirParseHelper.getQuantityObservationValue(ACR.headOption, Option(UnitConceptEnum.ACR)).get
+  private def recommendReduceACRIfApplicable(acrOpt: Option[Double], output: CdsResponseBuilder) = {
+    if(acrOpt.isDefined){
+      val acr = acrOpt.get
       if(acr > 30) {
         output.withCard(_.loadCardWithPostTranslation("card-reduce-acr",
           "effectiveDate" -> DateTimeUtil.zonedNow()
@@ -299,10 +300,9 @@ object AdvanceFlowExecution {
    * @param output CdsResponseBuilder object
    * @return output with updated card
    */
-  private def recommendReduceHBA1CIfApplicable(HbA1C: Seq[Observation], output: CdsResponseBuilder) = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
-    if(checkExists(HbA1C) == 1){
-      val hba1c = FhirParseHelper.getQuantityObservationValue(HbA1C.headOption, Option(UnitConceptEnum.HBA1C)).get
+  private def recommendReduceHBA1CIfApplicable(hba1cOpt: Option[Double], output: CdsResponseBuilder) = {
+    if(hba1cOpt.isDefined){
+      val hba1c = hba1cOpt.get
       if(hba1c >= 42) {
         output.withCard(_.loadCardWithPostTranslation("card-reduce-hba1c",
           "effectiveDate" -> DateTimeUtil.zonedNow()
@@ -328,16 +328,15 @@ object AdvanceFlowExecution {
    * @param output CdsResponseBuilder object
    * @return output with updated card
    */
-  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Seq[Condition], ckd: Seq[Condition], cvd: Seq[Condition], atorvastatin: Seq[MedicationStatement],
-                                                hdl: Seq[Observation], cholesterol: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
-    if(checkExists(cholesterol) == 1 && checkExists(hdl) == 1){
-      val _cholesterol = FhirParseHelper.getQuantityObservationValue(cholesterol.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
-      val _hdl = FhirParseHelper.getQuantityObservationValue(hdl.headOption, Option(UnitConceptEnum.CHOLESTEROL)).get
+  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Boolean, ckd: Boolean, cvd: Boolean, atorvastatin: Boolean,
+                                                hdl: Option[Double], cholesterol: Option[Double], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if(cholesterol.isDefined && hdl.isDefined){
+      val _cholesterol = cholesterol.get
+      val _hdl = hdl.get
       if((_cholesterol - _hdl)>3) {
         val targetCholesterol = _cholesterol - ((_cholesterol - _hdl) * 0.4)
-        if (t2d.nonEmpty && ckd.isEmpty && atorvastatin.isEmpty) {
-          if (cvd.nonEmpty) {
+        if (t2d && ckd && !atorvastatin) {
+          if (cvd) {
             output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
               "effectiveDate" -> DateTimeUtil.zonedNow(),
               "dose" -> 80,
