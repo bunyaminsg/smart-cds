@@ -90,6 +90,11 @@ object CdsPrefetchUtil {
    * @return race of the patient
    */
   def getRaceCategory(prefetchKey: String, fhirPathEvaluator: FhirPathEvaluator): String = {
+    /*
+      This function is specifically for ACC/AHA algorithm since it has only parameters for black
+      people and white people. Any race other than black (asians, indians etc...)
+      are considered "white" for this algorithm.
+    */
     fhirPathEvaluator.evaluateOptionalString(s"%cdsPrefetch.$prefetchKey.valueCodeableConcept.coding.code", JNothing) match {
       case Some("LA6162-7") => "africanamerican"
       case _ => "white"
