@@ -273,9 +273,9 @@ object AdvanceFlowExecution {
   /**
    * Recommends ACR Reduction if needed
    *
-   * @param ACR Albumin/Creatine Ratio Observation
-   * @param output CdsResponseBuilder object
-   * @return output with updated card
+   * @param acrOpt
+   * @param output
+   * @return
    */
   private def recommendReduceACRIfApplicable(acrOpt: Option[Double], output: CdsResponseBuilder) = {
     if(acrOpt.isDefined){
@@ -296,9 +296,9 @@ object AdvanceFlowExecution {
   /**
    * Recommends HbA1C Reduction if needed
    *
-   * @param HbA1C HbA1C Observation
-   * @param output CdsResponseBuilder object
-   * @return output with updated card
+   * @param hba1cOpt
+   * @param output
+   * @return
    */
   private def recommendReduceHBA1CIfApplicable(hba1cOpt: Option[Double], output: CdsResponseBuilder) = {
     if(hba1cOpt.isDefined){
