@@ -134,7 +134,8 @@ object ACCAHAFlowExecution {
     }
 
     /* Get related information about the patient */
-    val diabetes = type1Diabetes | type2Diabetes
+    val diabetes = if (type1Diabetes == 1 || type2Diabetes == 1) 1 else 0
+    /* treat diabetes situation as bool */
     val treatedHypertension = hypertensiveTreatment
 
     val totalCholesterol = cholesterolOpt.get
