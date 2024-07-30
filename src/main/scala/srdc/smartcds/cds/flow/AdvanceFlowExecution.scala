@@ -21,26 +21,26 @@ object AdvanceFlowExecution {
   /**
    * Execute ADVANCE Calculation flow
    *
-   * @param age
-   * @param gender
-   * @param atrialFibrillation
-   * @param retinopathy
-   * @param hypertensiveTreatment
-   * @param hba1cOpt
-   * @param acrOpt
-   * @param totalCholesterolOpt
-   * @param hdlOpt
-   * @param sbpOpt
-   * @param dbpOpt
-   * @param type1Diabetes
-   * @param type2Diabetes
-   * @param type1DiabetesDuration
-   * @param type2DiabetesDuration
-   * @param ckd45
-   * @param cvd
-   * @param atorvastatin
-   * @param responseBuilder
-   * @return
+   * @param age Age pf the patient
+   * @param gender Gender of the patient
+   * @param atrialFibrillation Atrial Fibrillation Condition
+   * @param retinopathy Retinopathy Condition
+   * @param hypertensiveTreatment Hypertensive Treatment Medication
+   * @param hba1cOpt HbA1C Observation
+   * @param acrOpt ACR Observation
+   * @param totalCholesterolOpt Total Cholesterol Observation
+   * @param hdlOpt HDL Cholesterol Observation
+   * @param sbpOpt Systolic Blood Pressure Observation
+   * @param dbpOpt Diastolic Blood Pressure Observation
+   * @param type1Diabetes Type 1 Diabetes Condition
+   * @param type2Diabetes Type 2 Diabetes Condition
+   * @param type1DiabetesDuration Type 1 Diabetes Duration
+   * @param type2DiabetesDuration Type 2 Diabetes Duration
+   * @param ckd45 Stage 4 or 5 Chronic Kidney Disease Condition
+   * @param cvd CVD Condition
+   * @param atorvastatin Atorvastatin Medication
+   * @param responseBuilder Response Builder
+   * @return Returns Healthy Score and Patient Score Calculated by ADVANCE Algorithm as a Pair in a Card
    */
 
   def executionFlow(age: Int, gender: String, atrialFibrillation: Boolean,retinopathy: Boolean, hypertensiveTreatment: Boolean,
@@ -93,9 +93,6 @@ object AdvanceFlowExecution {
       dbp = dbpOpt.get
     }
     val pulse_p = sbp - dbp
-
-    //Get boolean type parameters
-
 
 
     //Get diabetes observation and calculate diabetes duration and age
@@ -273,9 +270,9 @@ object AdvanceFlowExecution {
   /**
    * Recommends ACR Reduction if needed
    *
-   * @param acrOpt
-   * @param output
-   * @return
+   * @param acrOpt ACR Observation
+   * @param output Current Output Card
+   * @return Output with Updated Card
    */
   private def recommendReduceACRIfApplicable(acrOpt: Option[Double], output: CdsResponseBuilder) = {
     if(acrOpt.isDefined){
@@ -296,9 +293,9 @@ object AdvanceFlowExecution {
   /**
    * Recommends HbA1C Reduction if needed
    *
-   * @param hba1cOpt
-   * @param output
-   * @return
+   * @param hba1cOpt HbA1C Observation
+   * @param output Current Output Card
+   * @return Output with Updated Card
    */
   private def recommendReduceHBA1CIfApplicable(hba1cOpt: Option[Double], output: CdsResponseBuilder) = {
     if(hba1cOpt.isDefined){
@@ -319,14 +316,14 @@ object AdvanceFlowExecution {
    * Recommends ACR Reduction if needed
    *
    * @param riskScore Risk Score Calculated So Far
-   * @param t2d Type2Diabetes Observation
+   * @param t2d Type2Diabetes Condition
    * @param ckd Stage 4 or 5 Chronic Kidney Disease Observation
    * @param cvd CVD Observation
    * @param atorvastatin Atorvastatin Medication
    * @param hdl HDL Observation
    * @param cholesterol TotalCholesterol Observation
-   * @param output CdsResponseBuilder object
-   * @return output with updated card
+   * @param output Current Output Card
+   * @return Output with Updated Card
    */
   private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Boolean, ckd: Boolean, cvd: Boolean, atorvastatin: Boolean,
                                                 hdl: Option[Double], cholesterol: Option[Double], output: CdsResponseBuilder): CdsResponseBuilder = {
