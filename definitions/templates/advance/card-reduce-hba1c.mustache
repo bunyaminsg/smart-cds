@@ -1,0 +1,45 @@
+{
+  "uuid": "ADVANCE REDUCE HBA1C",
+  "summary": "Control HbA1C",
+  "indicator": "no-show",
+  "detail": "Control HbA1C (HbA1C = 5.7%)",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Control HbA1C (HbA1C = 5.7%)",
+      "uuid": "suggestion-reduce-bp",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "4548-4",
+                  "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 5.7,
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

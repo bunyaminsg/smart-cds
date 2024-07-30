@@ -1,0 +1,101 @@
+{
+  "serviceId": "advance",
+  "concepts": {
+    "AtrialFibrillation": {
+      "resourceType": "Condition",
+      "type": "boolean"
+    },
+    "Retinopathy": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "Retinopathy"
+      }
+    },
+    "HypertensiveTreatment": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "Hypertensive Treatment"
+      }
+    },
+    "HbA1C": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mmol/mol",
+      "min": 0,
+      "max": 999
+    },
+    "ACR": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mg/mmol",
+      "min": 0,
+      "max": 999
+    },
+    "TotalCholesterol": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mmol/l",
+      "min": 0,
+      "max": 999
+    },
+    "HDL": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mmol/l",
+      "min": 0,
+      "max": 999
+    },
+
+    "BP_SBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "SystolicBP"
+    },
+    "BP_DBP": {
+      "resourceType": "Observation",
+      "type": "Quantity",
+      "unit": "mm[Hg]",
+      "min": 0,
+      "max": 999,
+      "conceptId": "DiastolicBP"
+    },
+
+
+    "Type1Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "selectDate": true
+    },
+    "Type2Diabetes": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "selectDate": true
+    },
+    "CKD4_5": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "select": "Bundle",
+      "label": {
+        "en": "CKD Stage > 4"
+      }
+    },
+    "CVD": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "label": {
+        "en": "CVD"
+      }
+    },
+    "Atorvastatin": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean"
+    }
+  }
+}

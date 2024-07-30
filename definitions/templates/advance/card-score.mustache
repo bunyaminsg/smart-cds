@@ -1,0 +1,52 @@
+{
+  "uuid": "CVD CARD SCORE",
+  "summary": "ADVANCE Risk SCORE",
+  "indicator": "no-show",
+  "detail": "",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "ADVANCE Risk Score",
+      "uuid": "Suggestion 1",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "advance-risk",
+                  "display": "ADVANCE Risk Score"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": {{scoreValue}},
+              "unit": "%",
+              "system": "http://unitsofmeasure.org",
+              "code": "%"
+            },
+            "referenceRange": [
+              {
+                "high": {
+                  "value": {{healthyValue}}
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
