@@ -16,7 +16,7 @@ object CdsPrefetchUtil {
 
   /** FHIR Paths for specific fields */
   private def conditionOnSetDateTimePath(prefetchKey: String)  = s"%cdsPrefetch.$prefetchKey.onsetDateTime"
-  private def observationValuePath(prefetchKey: String) = s"%cdsPrefetch.$prefetchKey.valueQuantity.value"
+  private def observationValuePath(prefetchKey: String) = s"%cdsPrefetch.$prefetchKey.valueQuantity.value.first()"
   private def existsPath(prefetchKey: String) = s"%cdsPrefetch.$prefetchKey.exists()"
   private def observationOrComponentValuePath(prefetchKey: String, conceptId: String): String = {
     val codes = ValueSetUtil.getConceptSystemAndCode(conceptId)
@@ -63,7 +63,7 @@ object CdsPrefetchUtil {
    * @return
    */
   def getObservationOrComponentValue(prefetchKey: String, conceptId: String, fhirPathEvaluator: FhirPathEvaluator): Option[Double] = {
-    fhirPathEvaluator.evaluateOptionalNumerical(CdsPrefetchUtil.observationOrComponentValuePath(prefetchKey, conceptId), JNothing).map(_.toDouble)
+    CdsPrefetchUtil.getObservationOrComponentSeqValue(prefetchKey, conceptId, fhirPathEvaluator).headOption
   }
 
   /**
@@ -95,7 +95,7 @@ object CdsPrefetchUtil {
   }
 
   /**
-   * Determines the ethnicity of the patient
+   * Determines the ethnicity of the patient (USED IN QRISK3)
    * @param prefetchKey
    * @param fhirPathEvaluator
    * @return Ethnicity Category in scale of 0 to 8 (0-White or not stated, 1-Indian, 2-Pakistani, 3-Bangladeshi, 4-Other Asian, 5-Black Caribbean, 6-Black African, 7-Chinese, 8-Other ethnic group)
@@ -112,6 +112,25 @@ object CdsPrefetchUtil {
       case Some("7") => Some(7)
       case Some("8") => Some(8)
       case _ => None
+    }
+  }
+
+  /**
+   * Determines the race using given prefetch
+   *
+   * @param prefetchKey
+   * @param fhirPathEvaluator
+   * @return race of the patient
+   */
+  def getRaceCategory(prefetchKey: String, fhirPathEvaluator: FhirPathEvaluator): String = {
+    /*
+      This function is specifically for ACC/AHA algorithm since it has only parameters for black
+      people and white people. Any race other than black (asians, indians etc...)
+      are considered "white" for this algorithm.
+    */
+    fhirPathEvaluator.evaluateOptionalString(s"%cdsPrefetch.$prefetchKey.valueCodeableConcept.coding.code", JNothing) match {
+      case Some("LA6162-7") => "africanamerican"
+      case _ => "white"
     }
   }
 
