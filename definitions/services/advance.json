@@ -1,0 +1,23 @@
+{
+  "hook": "calculate",
+  "title": "ADVANCE service",
+  "description": "",
+  "id": "advance",
+  "prefetch": {
+    "patient": "Patient/{{context.patientId}}",
+    "AtrialFibrillation": "Condition?patient=Patient/{{context.patientId}}&code={{config.AtrialFibrillation}}&_count=1",
+    "Retinopathy": "Condition?patient=Patient/{{context.patientId}}&code={{config.Retinopathy}}&_count=1",
+    "HypertensiveTreatment": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.HypertensiveTreatment}}&_count=1",
+    "HbA1C": "Observation?patient=Patient/{{context.patientId}}&code={{config.HbA1C}}&_sort=-date&_count=1",
+    "ACR": "Observation?patient=Patient/{{context.patientId}}&code={{config.ACR}}&_sort=-date&_count=1",
+    "TotalCholesterol": "Observation?patient=Patient/{{context.patientId}}&code={{config.TotalCholesterol}}&_sort=-date&_count=1",
+    "HDL": "Observation?patient=Patient/{{context.patientId}}&code={{config.HDL}}&_sort=-date&_count=1",
+    "BP_SBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_SBP}}&_sort=-date&_count=1",
+    "BP_DBP": "Observation?patient=Patient/{{context.patientId}}&code={{config.BP_DBP}}&_sort=-date&_count=1",
+    "Type1Diabetes": "Observation?patient=Patient/{{context.patientId}}&code={{config.Type1Diabetes}}&_sort=-date&_count=1",
+    "Type2Diabetes": "Observation?patient=Patient/{{context.patientId}}&code={{config.Type2Diabetes}}&_sort=-date&_count=1",
+    "CKD4_5": "Condition?patient=Patient/{{context.patientId}}&code={{config.CKD4_5}}&_count=1",
+    "CVD": "Condition?patient=Patient/{{context.patientId}}&code={{config.CVD}}&_count=1",
+    "Atorvastatin": "MedicationStatement?patient=Patient/{{context.patientId}}&code={{config.Atorvastatin}}&status=active&_count=1"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "uuid": "ADVANCE REDUCE ACR",
+  "summary": "Control Albumin/Creatine Ratio",
+  "indicator": "no-show",
+  "detail": "Control Albumin/Creatine Ratio (ACR = 2 mg/mmol)",
+  "source": {
+    "label": "",
+    "url": ""
+  },
+  "suggestions": [
+    {
+      "label": "Control Albumin/Creatine Ratio (ACR = 2 mg/mmol)",
+      "uuid": "suggestion-reduce-bp",
+      "actions": [
+        {
+          "type": "create",
+          "description": "",
+          "resource": {
+            "resourceType": "Observation",
+            "subject": {
+              "reference": "Patient/{{context.patientId}}"
+            },
+            "status": "final",
+            "effectiveDateTime": "{{effectiveDate}}",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32294-1",
+                  "display": "Albumin/Creatinine [Ratio] in Urine"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 2,
+              "unit": "mg/mmol",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/mmol"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
