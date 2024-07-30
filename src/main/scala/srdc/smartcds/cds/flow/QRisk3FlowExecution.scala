@@ -25,53 +25,51 @@
 package srdc.smartcds.cds.flow
 
 import io.onfhir.cds.model.CdsResponseBuilder
-import srdc.smartcds.model.fhir.{Condition, FamilyMemberHistory, MedicationStatement, Observation, Patient}
-import srdc.smartcds.util.{DateTimeUtil, FhirParseHelper, UnitConceptEnum}
-
-import scala.math.{exp, pow, sqrt}
-import scala.util.Try
+import srdc.smartcds.util.{DateTimeUtil, SmokingCategoryEnum}
+import scala.math.sqrt
 
 object QRisk3FlowExecution {
 
   /**
-   * Executes QRISK3 calculation service
- *
-   * @param patient Patient resource
-   * @param AtrialFibrillation Atrial Fibrillation Condition
-   * @param RheumatoidArthritis Rheumatoid Arthritis Condition
-   * @param CKD3_4_5 Chronic kidney disease (stage 3, 4 or 5)
-   * @param Type1Diabetes Type 1 Diabetes Condition
-   * @param Type2Diabetes Type 1 Diabetes Condition
-   * @param HypertensiveTreatment Hypertensive Treatment
-   * @param BMI Body Mass Index Observation
-   * @param TotalCholesterol Total Cholesterol Observation
-   * @param HDL HDL Observation
-   * @param BP_SBP Systolic Blood Pressure Observation
-   * @param SmokingStatus Smoking Status Observation
-   * @param CVD_FMH Angina or heart attack in a 1st degree relative
-   * @param Corticosteroids Cortico Steroid Medical Treatment
-   * @param Antipsychotics Antipsychotic Medical Treatment
-   * @param Ethnicity Ethnicity Observation
-   * @param SystemicLupusErythematosus Systemic Lupus Erythematosus Condition
-   * @param SevereMentalIllness Severe Mental Illness Condition
-   * @param ErectileDysfunction Erectile Dysfunction Condition
-   * @param Migraine Migraine Condition
+   *
+   * @param age Age of the patient
+   * @param gender Gender of the patient
+   * @param atrialFibrillation Atrial Fibrillation Condition Boolean
+   * @param rheumatoidArthritis Rheumatoid Arthritis Condition Boolean
+   * @param ckd345 Chronic Kidney Disease (Stage 3-4-5) Condition Boolean
+   * @param type1Diabetes Type 1 Diabetes Condition Boolean
+   * @param type2Diabetes Typ2 Diabetes Condition Boolean
+   * @param hypertensiveTreatment Hypertensive Treatment Boolean
+   * @param bmi Body Mass Index value of the patient
+   * @param totalCholesterol Total Cholesterol of the patient
+   * @param hdl HDL Cholesterol of the patient
+   * @param bp Blood Pressure of the Patient
+   * @param smokingStatus Current Smoking Status of the patient
+   * @param cvdFmh Angina or heart attack in a 1st degree relative
+   * @param cvd Cardiovascular disease Condition Boolean
+   * @param atorvastatin Atorvastatin Medical Treatment Boolean
+   * @param systemicLupusErythematosus Systemic Lupus Erythematosus Condition Boolean
+   * @param severeMentalIllness Severe Mental Illness Condition Boolean
+   * @param antipsychotics Antipsychotic Medical Treatment Boolean
+   * @param erectileDysfunction Erectile Dysfunction Condition Boolean
+   * @param migraine Migraine Condition Boolean
+   * @param corticoSteroids Cortico Steroid Medical Treatment Boolean
+   * @param ethnicity Ethnicity of the patient
    * @param responseBuilder Response Builder
-   * @return if applicable, returns the related QRisk3 Score a particular Patient and for a healthy Person of same gender and ethnicity. If not the inputs are not sufficient, returns None
+   * @return
    */
-  def executeFlow(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD3_4_5: Seq[Condition],
-                  Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
-                  BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
-                  CVD_FMH: Seq[FamilyMemberHistory], Corticosteroids: Seq[MedicationStatement], Antipsychotics: Seq[MedicationStatement],
-                  Ethnicity: Seq[Observation], SystemicLupusErythematosus: Seq[Condition], SevereMentalIllness: Seq[Condition],
-                  ErectileDysfunction: Seq[Condition], Migraine: Seq[Condition], responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
+  def executeFlow(age: Int, gender: String, atrialFibrillation: Int, rheumatoidArthritis: Int, ckd345: Int,
+                  type1Diabetes: Int, type2Diabetes: Int, hypertensiveTreatment: Int, bmi: Option[Double],
+                  totalCholesterol: Option[Double], hdl: Option[Double],
+                  bp: Seq[Double], smokingStatus: Option[Int], cvdFmh: Int, cvd: Boolean, atorvastatin: Boolean, systemicLupusErythematosus: Int, severeMentalIllness: Int,
+                  antipsychotics: Int, erectileDysfunction: Int, migraine: Int, corticoSteroids: Int, ethnicity: Option[Int],
+                  responseBuilder: CdsResponseBuilder): CdsResponseBuilder = {
 
     // Output that contains the QRisk3 Risk and Healthy Risk values
     var output = responseBuilder
-
-    val riskScores = calculateQRisk(patient, AtrialFibrillation, RheumatoidArthritis, CKD3_4_5, Type1Diabetes, Type2Diabetes,
-      HypertensiveTreatment, BMI, TotalCholesterol, HDL, BP_SBP, SmokingStatus, CVD_FMH, Corticosteroids, Antipsychotics,
-      Ethnicity, SystemicLupusErythematosus, SevereMentalIllness, ErectileDysfunction, Migraine)
+    val riskScores = calculateQRisk(age, gender, atrialFibrillation, rheumatoidArthritis, ckd345, type1Diabetes, type2Diabetes,
+      hypertensiveTreatment, bmi, totalCholesterol, hdl, bp, smokingStatus, cvdFmh, systemicLupusErythematosus, severeMentalIllness, antipsychotics,
+      erectileDysfunction, migraine, corticoSteroids, ethnicity)
 
     if (riskScores.isDefined) {
       output = output.withCard(_.loadCardWithPostTranslation("card-score",
@@ -79,24 +77,26 @@ object QRisk3FlowExecution {
         "scoreValue" -> riskScores.get._1, // QRisk3 Risk Score
         "healthyValue" -> riskScores.get._2 // QRisk3 Risk Score of a healthy person
       ))
-      output = recommendStopSmokingIfApplicable(SmokingStatus, output)
-      output = recommendReduceBPIfApplicable(BP_SBP, output)
-      output = recommendReduceBMIIfApplicable(BMI, output)
-      output = recommendReduceTotalCholesterolIfApplicable(TotalCholesterol, output)
-      output = recommendIncreaseHDLIfApplicable(HDL, output)
+
+      /**
+       * Adding suggestions for patient if needed
+       */
+      output = recommendAtorvastatinIfApplicable(riskScores.get._1, type2Diabetes == 1, ckd345 == 1, cvd, atorvastatin, hdl, totalCholesterol, output)
+      output = recommendStopSmokingIfApplicable(smokingStatus, output)
+      output = recommendReduceBPIfApplicable(bp, output)
+      output = recommendReduceBMIIfApplicable(bmi, output)
     }
     output
   }
 
   /**
    *
-   * @param BMI Body Mass Index of the Patient
-   * @param output CdsResponseBuilder with the suggestion to lower the BMI If BMI is known and it is bigger than the healthy BMI value
-   * @return
+   * @param bmi Body Mass Index value of the patient
+   * @param output output
+   * @return If the BMI value of the patient is bigger than 25, patient is suggested to lower his/her BMI value
    */
-  private def recommendReduceBMIIfApplicable(BMI: Seq[Observation], output: CdsResponseBuilder) = {
-    val bmiOpt = Try(BMI.head.valueQuantity.get.value.get).toOption
-    if (bmiOpt.isDefined && bmiOpt.get > 25) {
+  private def recommendReduceBMIIfApplicable(bmi: Option[Double], output: CdsResponseBuilder) = {
+    if (bmi.exists(_ > 25)) {
       output.withCard(_.loadCardWithPostTranslation("card-reduce-bmi",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
@@ -107,13 +107,12 @@ object QRisk3FlowExecution {
 
   /**
    *
-   * @param BP_SBP Systolic Blood Pressure of the Patient
-   * @param output CdsResponseBuilder with the suggestion to lower the SBP If SBP is known and it is bigger than the healthy SBP value
-   * @return
+   * @param sbp Systolic Blood Pressure value of the patient
+   * @param output output
+   * @return If the SBP value of the patient is bigger than 140, patient is suggested to lower is SBP value
    */
-  private def recommendReduceBPIfApplicable(BP_SBP: Seq[Observation], output: CdsResponseBuilder) = {
-    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP)
-    if(sbpOpt.isDefined && sbpOpt.get > 140){
+  private def recommendReduceBPIfApplicable(sbp: Seq[Double], output: CdsResponseBuilder) = {
+    if (sbp.exists(y => {y > 140})) {
       output.withCard(_.loadCardWithPostTranslation("card-reduce-bp",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
@@ -124,48 +123,12 @@ object QRisk3FlowExecution {
 
   /**
    *
-   * @param TotalCholesterol Total Cholesterol of the Patient
-   * @param output CdsResponseBuilder with the suggestion to lower the Total Cholesterol If TotalCholesterol is known and it is bigger than the healthy TotalCholesterol value
-   * @return
+   * @param smokingStatus An integer that represents that smoking habbit of the patient
+   * @param output output
+   * @return If the patient is heavily addicted to smoking, he/she is suggested to quit smoking
    */
-  private def recommendReduceTotalCholesterolIfApplicable(TotalCholesterol: Seq[Observation], output: CdsResponseBuilder) = {
-    val cholesterolObs = TotalCholesterol.headOption
-    if(FhirParseHelper.checkObservationValuesExist(List(cholesterolObs)) &&
-      FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get > 6.21){
-      output.withCard(_.loadCardWithPostTranslation("card-reduce-cholesterol",
-        "effectiveDate" -> DateTimeUtil.zonedNow()
-      ))
-    } else {
-      output
-    }
-  }
-
-  /**
-   *
-   * @param HDL HDL Cholesterol value of the Patient
-   * @param output CdsResponseBuilder with the suggestion to increse HDL If HDL is known and it is smaller than the healthy HDL value
-   * @return
-   */
-  private def recommendIncreaseHDLIfApplicable(HDL: Seq[Observation], output: CdsResponseBuilder) = {
-    val hdlObs = HDL.headOption
-    if(FhirParseHelper.checkObservationValuesExist(List(hdlObs)) &&
-      FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get < 1.03){
-      output.withCard(_.loadCardWithPostTranslation("card-increase-hdl",
-        "effectiveDate" -> DateTimeUtil.zonedNow()
-      ))
-    } else {
-      output
-    }
-  }
-
-  /**
-   *
-   * @param SmokingStatus Patient's current smoking habit
-   * @param output CdsResponseBuilder with the suggestion to decrease Smoking If Smoking Status is known and the patient is highly addicted
-   * @return
-   */
-  private def recommendStopSmokingIfApplicable(SmokingStatus: Seq[Observation], output: CdsResponseBuilder): CdsResponseBuilder = {
-    if (getSmokingCategory(SmokingStatus.headOption) > 1) {
+  private def recommendStopSmokingIfApplicable(smokingStatus: Option[Int], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if (smokingStatus.get >= SmokingCategoryEnum.LIGHT) {
       output.withCard(_.loadCardWithPostTranslation("card-stop-smoking",
         "effectiveDate" -> DateTimeUtil.zonedNow()
       ))
@@ -176,179 +139,107 @@ object QRisk3FlowExecution {
 
   /**
    *
-   * @param smokingStatus Patient's smoking habit
-   * @return An integer that represents the health risk that smoking poses
+   * @param riskScore The QRisk3 risk score value of the patient
+   * @param t2d Type 2 Diabetes Flag
+   * @param ckd Chronic Kidney Disease Flag
+   * @param cvd CVD Flag
+   * @param atorvastatin Atorvastatin Flag (True if the patient is on it)
+   * @param hdl HDL Value of the patient
+   * @param cholesterol Total Cholesterol of the patient
+   * @param output output
+   * @return If a patient has Type2Diabetes without CKD and taking Atorvastatin and
+   *         if that patient has CVD or has a risk score aboce 10%,
+   *         that user suggested to use Atorvastatin to reduce non-hdl cholesterol
    */
-  private def getSmokingCategory(smokingStatus: Option[Observation]) = {
-    val smoking = smokingStatus.flatMap(_.valueCodeableConcept.map(_.coding.map(_.code).toSeq)).getOrElse(Seq("266919005"))
-    if (Seq("LA18978-9", "LA18980-5", "266919005").intersect(smoking).nonEmpty) 0
-    else if (smoking.contains("LA15920-4", "8517006")) 1
-    else if (Seq("LA18977-1", "LA18982-1").intersect(smoking).nonEmpty) 2
-    else if (Seq("LA18979-7", "LA18976-3", "449868002").intersect(smoking).nonEmpty) 3
-    else if (smoking.contains("LA18981-3")) 4
-    else 0
+  private def recommendAtorvastatinIfApplicable(riskScore: Double, t2d: Boolean, ckd: Boolean, cvd: Boolean, atorvastatin: Boolean,
+                                                hdl: Option[Double], cholesterol: Option[Double], output: CdsResponseBuilder): CdsResponseBuilder = {
+    if(cholesterol.isDefined && hdl.isDefined) {
+      val _cholesterol = cholesterol.get
+      val _hdl = hdl.get
+      val targetCholesterol = _cholesterol - ((_cholesterol - _hdl) * 0.4)
+      if (t2d && !ckd && !atorvastatin) {
+        if (cvd) {
+          output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
+            "effectiveDate" -> DateTimeUtil.zonedNow(),
+            "dose" -> 80,
+            "value" -> targetCholesterol
+          ))
+        } else if (riskScore > 10) {
+          output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
+            "effectiveDate" -> DateTimeUtil.zonedNow(),
+            "dose" -> 20,
+            "value" -> targetCholesterol
+          ))
+        } else {
+          output
+        }
+      } else {
+        output
+      }
+    } else {
+      output
+    }
+  }
+
+  /**
+   *
+   * @param sbpList Systolic Blood Pressure Measurement list of the patient (5 max)
+   * @return If at least last 2 SBP measurement of the patient is known,
+   *         this function returns that Standart deviation of that measurements
+   */
+  private def sbpStdDevCalc(sbpList:Seq[Double]): Double = {
+    if(sbpList.length >= 2) {
+      val sbpMean: Double = sbpList.sum / sbpList.length
+      var output: Double = 0
+      for(n <- sbpList){
+        output = output + ((sbpMean-n)*(sbpMean-n))
+      }
+      output = output/sbpList.length
+      sqrt(output)
+    }
+    else{
+      0
+    }
   }
 
   /**
    * Validates given prefetch and returns the QRISK3 score
    */
-  def calculateQRisk(patient: Patient, AtrialFibrillation: Seq[Condition], RheumatoidArthritis: Seq[Condition], CKD3_4_5: Seq[Condition],
-                     Type1Diabetes: Seq[Condition], Type2Diabetes: Seq[Condition], HypertensiveTreatment: Seq[MedicationStatement],
-                     BMI: Seq[Observation], TotalCholesterol: Seq[Observation], HDL: Seq[Observation], BP_SBP: Seq[Observation], SmokingStatus: Seq[Observation],
-                     CVD_FMH: Seq[FamilyMemberHistory], Corticosteroids: Seq[MedicationStatement], Antipsychotics: Seq[MedicationStatement],
-                     Ethnicity: Seq[Observation], SystemicLupusErythematosus: Seq[Condition], SevereMentalIllness: Seq[Condition],
-                     ErectileDysfunction: Seq[Condition], Migraine: Seq[Condition]): Option[(Double, Double)] = {
-    val checkExists = (resources: Seq[Any]) => if (resources.nonEmpty) 1 else 0
+  def calculateQRisk(age: Int, gender: String, b_AF: Int, b_ra: Int, b_renal: Int, b_type1: Int, b_type2: Int, b_treatedhyp: Int,
+                     bmiOpt: Option[Double], cholesterolOpt: Option[Double], hdlOpt: Option[Double], sbpOpt: Seq[Double], smokingCategory: Option[Int],
+                     fh_cvd: Int, systemicLupusErythematosus: Int, severeMentalIllness: Int,
+                     antipsychotics: Int, erectileDysfunction: Int, migraine: Int, corticoSteroids: Int,
+                     ethnicity: Option[Int]): Option[(Double, Double)] = {
 
-    val age = FhirParseHelper.getAge(patient) // Age of the patient
-    val b_AF = checkExists(AtrialFibrillation) // Atrial Fibrillation Condition Boolean
-    val b_atypicalantipsy = checkExists(Antipsychotics) // Antipsychotics Usage Boolean
-    val b_corticosteroids = checkExists(Corticosteroids) // Steroid Tablet Usage Boolean
-    val b_impotence2 = checkExists(ErectileDysfunction) // Erectile Dysfunction Condition Boolean
-    val b_migraine = checkExists(Migraine) // Migraine Condition Boolean
-    val b_ra = checkExists(RheumatoidArthritis) // Rheumatoid Arthritis Condition Boolean
-    val b_renal = checkExists(CKD3_4_5) // Chronic Kidney Disease (Stage 3-4-5) Condition Boolean
-    val b_semi = checkExists(SevereMentalIllness) // Severe Mental Illness (Severe and Moderate Depression, Schizophrenia and Bipolar) Condition Boolean
-    val b_sle = checkExists(SystemicLupusErythematosus) // Systemic Lupus Erythematosus Condition Boolean
-    val b_treatedhyp = checkExists(HypertensiveTreatment) // Hypertensive Treatment (Blood Pressure Treatment) Boolean
-    val b_type1 = checkExists(Type1Diabetes) // Type 1 Diabetes Condition Boolean
-    val b_type2 = checkExists(Type2Diabetes) // Type 1 Diabetes Condition Boolean
-    val bmiOpt = Try(BMI.head.valueQuantity.get.value.get).toOption // Body Mass Index Observable Quantity
-    var bmi: Double = 0
-    val fh_cvd = checkExists(CVD_FMH) // Family History (Angina or heart attack in a 1st degree relative) Boolean
-
-    val   cholesterolObs = TotalCholesterol.headOption // Total Cholesterol Observable Quantity
-    val hdlObs = HDL.headOption // HDL Cholesterol Observable Quantity
-
-    val sbpOpt = FhirParseHelper.getSystolicBP(BP_SBP) // Systolic Blood Pressure Observable Quantity
-
-    /**
-     *
-     *
-     * @param observations A sequence that contains the last SBP observations (5 MAX)
-     * @return if there are at least 2 measurements of SBP, returns the standard deviation of these SBP' s, else returns 0
-     */
-    def sbpStdDeviation(observations: Seq[Observation]): Double = {
-      if(observations.length >= 2){ // Checks if the number of previous measurements is 2
-        var output:Double = 0
-        var sum:Double = 0 // Cumulative sum of SBP' s
-        var l = Seq[Double]() // List of SBP' s
-        for (n <- observations){
-          val seq: Seq[Observation] = Seq(n)
-          val sbpOptDeviation = FhirParseHelper.getSystolicBP(seq)
-          if(sbpOptDeviation.isDefined){
-            l = l :+ sbpOptDeviation.get
-            sum = sum + sbpOptDeviation.get
-          }
-        }
-        if(l.length >= 2){
-          sum = sum/l.length
-          for(n <- l){
-            output = output + ((sum-n)*(sum-n))
-          }
-          output = output/l.length
-          sqrt(output)
-        }
-        else{
-          0
-        }
-      }
-      else{
-        0
-      }
-    }
-
-    val smokingObs = SmokingStatus.headOption // Smoking Status Observation
-    val ethnicityObs = Ethnicity.headOption // Ethnicity Observation
-
-    /**
-     * Checking if the required parameters are supplied
-     */
-    if (!FhirParseHelper.checkObservationValuesExist(List(smokingObs, ethnicityObs))) {
-      println("Please Enter Smoking Status and Ethnicity!")
+    /* Checking if smokingCategory and Ethnicity of the patient is supplied */
+    if (smokingCategory.isEmpty || ethnicity.isEmpty || bmiOpt.isEmpty || cholesterolOpt.isEmpty || sbpOpt.isEmpty || hdlOpt.isEmpty) {
+      println("Required inputs are not found")
       return None
     }
 
+    /* Setting up the inputs of the algorithm */
+    val bmi = bmiOpt.get
+    val cholesterol = cholesterolOpt.get
+    val hdl = hdlOpt.get
+    val sbp = sbpOpt.head
+    val sbpStd: Double = sbpStdDevCalc(sbpOpt)
+    val rati: Double = cholesterol / hdl
+    val smoke_cat = smokingCategory.get
 
-
-    val cholesterol: Double = if(FhirParseHelper.checkObservationValuesExist(List(cholesterolObs))) {FhirParseHelper.getQuantityObservationValue(cholesterolObs, Option(UnitConceptEnum.CHOLESTEROL)).get} else {5.17}
-    val hdl: Double = if(FhirParseHelper.checkObservationValuesExist(List(hdlObs))) {FhirParseHelper.getQuantityObservationValue(hdlObs, Option(UnitConceptEnum.CHOLESTEROL)).get} else {1.55}
-    val rati: Double = cholesterol / hdl // Default value for TotalCholesterol/HDL ratio
-
-    val sbp = if(sbpOpt.isEmpty) {125} else {sbpOpt.get}
-    val sbpDeviation = sbpStdDeviation(BP_SBP)
-
-    /**
-     * Assign the risk of smoking to the var smoke_cat based on the smoking habit
-     */
-    val smoke_cat = getSmokingCategory(smokingObs)
-
-    val maleIndicator: Boolean = patient.gender.contains("male") // A boolean flag indicating the gender is male
     val surv = 10
     val town = 0
-
-    /**
-     * Assign the risk of race to the var ethrisk and average default BMI value based on the patient's ethnicity
-     */
-    val ethriskCode = Ethnicity.headOption.map(_.valueCodeableConcept.flatMap(_.coding.headOption.map(_.code)).getOrElse("0"))
-    val ethrisk: Int = ethriskCode match {
-      case Some("0") =>
-        if(maleIndicator){bmi = 27.1}
-        else{bmi = 27.5}
-        1
-      case Some("1") =>
-        if(maleIndicator){bmi = 25.3}
-        else{bmi = 26.6}
-        2
-      case Some("2") =>
-        if(maleIndicator){bmi = 26.2}
-        else{bmi = 28.3}
-        3
-      case Some("3") =>
-        if(maleIndicator){bmi = 24.9}
-        else{bmi = 27}
-        4
-      case Some("4") =>
-        if(maleIndicator){bmi = 25.4}
-        else{bmi = 25.8}
-        5
-      case Some("5") =>
-        if(maleIndicator){bmi = 26.7}
-        else{bmi = 29.1}
-        6
-      case Some("6") =>
-        if(maleIndicator){bmi = 26.3  }
-        else{bmi = 29.5}
-        7
-      case Some("7") =>
-        if(maleIndicator){bmi = 23.8}
-        else{bmi = 23.9}
-        8
-      case Some("8") =>
-        if(maleIndicator){bmi = 26.3}
-        else{bmi = 27.5}
-        9
-      case _ =>
-        if(maleIndicator){bmi = 27.1}
-        else{bmi = 27.5}
-        0
-    }
-
-    if(bmiOpt.isDefined){bmi = bmiOpt.get} // If BMI value is supplied, assign it to the var bmi
+    val ethrisk = ethnicity.get
 
     /* A print statement in order to trace the inputs */
-    println(s"Calculating QRisk3 Risk with values: age=$age,bmi=$bmi totalCholesterol=$cholesterol, hdlCholesterol=$hdl, sbp=$sbp, type1=$b_type1, treatedHypertension=$b_treatedhyp, race=$ethrisk, smoke_cat=$smoke_cat, sbp5=$sbpDeviation, fh_cvd=$fh_cvd, b_treatedhyp=$b_treatedhyp, atypical=$b_atypicalantipsy")
+    println(s"Calculating QRisk3 Risk with values: age=$age,bmi=$bmi totalCholesterol=$cholesterol, hdlCholesterol=$hdl, sbp=$sbp, type1=$b_type1, treatedHypertension=$b_treatedhyp, race=$ethrisk, smoke_cat=$smoke_cat, sbp5=$sbpStd, fh_cvd=$fh_cvd, b_treatedhyp=$b_treatedhyp, atypical=$antipsychotics")
 
-    /**
-     * Calls out the correct function with patient's inputs and a healthy person's inputs based on the gender of patient
-     */
-    if (maleIndicator) {
-      val patientScore = cvdMaleRaw(age, b_AF, b_atypicalantipsy, b_corticosteroids, b_impotence2, b_migraine, b_ra, b_renal, b_semi, b_sle, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpDeviation, smoke_cat, surv, town)
-      val healthyScore = cvdMaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 4, 125, 0, 0, surv, town)
+    if (gender == "male") {
+      val patientScore = cvdMaleRaw(age, b_AF, antipsychotics, corticoSteroids, erectileDysfunction, migraine, b_ra, b_renal, severeMentalIllness, systemicLupusErythematosus, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpStd, smoke_cat, surv, town)
+      val healthyScore = cvdMaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 3.33, 125, 0, 0, surv, town)
       Some(patientScore,healthyScore)
     } else {
-      val patientScore = cvdFemaleRaw(age, b_AF, b_atypicalantipsy, b_corticosteroids, b_migraine, b_ra, b_renal, b_semi, b_sle, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpDeviation, smoke_cat, surv, town)
-      val healthyScore = cvdFemaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 4, 125, 0, 0, surv, town)
+      val patientScore = cvdFemaleRaw(age, b_AF, antipsychotics, corticoSteroids, migraine, b_ra, b_renal, severeMentalIllness, systemicLupusErythematosus, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpStd, smoke_cat, surv, town)
+      val healthyScore = cvdFemaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 3.33, 125, 0, 0, surv, town)
       Some(patientScore,healthyScore)
     }
   }

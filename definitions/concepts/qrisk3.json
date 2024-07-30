@@ -46,21 +46,24 @@
       "type": "Quantity",
       "unit": "kg/m2",
       "min": 0,
-      "max": 99
+      "max": 99,
+      "required": true
     },
     "TotalCholesterol": {
       "resourceType": "Observation",
       "type": "Quantity",
       "unit": "mg/dL",
       "min": 0,
-      "max": 999
+      "max": 999,
+      "required": true
     },
     "HDL": {
       "resourceType": "Observation",
       "type": "Quantity",
       "unit": "mg/dL",
       "min": 0,
-      "max": 999
+      "max": 999,
+      "required": true
     },
     "BP_SBP": {
       "resourceType": "Observation",
@@ -68,7 +71,8 @@
       "unit": "mm[Hg]",
       "min": 0,
       "max": 999,
-      "conceptId": "SystolicBP"
+      "conceptId": "SystolicBP",
+      "required": true
     },
     "SmokingStatus": {
       "resourceType": "Observation",
@@ -103,6 +107,17 @@
       "type": "boolean",
       "conceptId": "CVD",
       "label": "Family History of CVD"
+    },
+    "Atorvastatin": {
+      "resourceType": "MedicationStatement",
+      "type": "boolean"
+    },
+    "CVD": {
+      "resourceType": "Condition",
+      "type": "boolean",
+      "label": {
+        "en": "CVD"
+      }
     }
   }
 }
