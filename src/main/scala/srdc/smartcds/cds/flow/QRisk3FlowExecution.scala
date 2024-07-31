@@ -218,6 +218,7 @@ object QRisk3FlowExecution {
     }
 
     /* Setting up the inputs of the algorithm */
+    val validAge = if(age < 25) {25} else if(age > 84) {84} else age
     val bmi = bmiOpt.get
     val cholesterol = cholesterolOpt.get
     val hdl = hdlOpt.get
@@ -231,15 +232,15 @@ object QRisk3FlowExecution {
     val ethrisk = ethnicity.get
 
     /* A print statement in order to trace the inputs */
-    println(s"Calculating QRisk3 Risk with values: age=$age,bmi=$bmi totalCholesterol=$cholesterol, hdlCholesterol=$hdl, sbp=$sbp, type1=$b_type1, treatedHypertension=$b_treatedhyp, race=$ethrisk, smoke_cat=$smoke_cat, sbp5=$sbpStd, fh_cvd=$fh_cvd, b_treatedhyp=$b_treatedhyp, atypical=$antipsychotics")
+    println(s"Calculating QRisk3 Risk with values: age=$validAge,bmi=$bmi totalCholesterol=$cholesterol, hdlCholesterol=$hdl, sbp=$sbp, type1=$b_type1, treatedHypertension=$b_treatedhyp, race=$ethrisk, smoke_cat=$smoke_cat, sbp5=$sbpStd, fh_cvd=$fh_cvd, b_treatedhyp=$b_treatedhyp, atypical=$antipsychotics")
 
     if (gender == "male") {
-      val patientScore = cvdMaleRaw(age, b_AF, antipsychotics, corticoSteroids, erectileDysfunction, migraine, b_ra, b_renal, severeMentalIllness, systemicLupusErythematosus, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpStd, smoke_cat, surv, town)
-      val healthyScore = cvdMaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 3.33, 125, 0, 0, surv, town)
+      val patientScore = cvdMaleRaw(validAge, b_AF, antipsychotics, corticoSteroids, erectileDysfunction, migraine, b_ra, b_renal, severeMentalIllness, systemicLupusErythematosus, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpStd, smoke_cat, surv, town)
+      val healthyScore = cvdMaleRaw(validAge, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 3.33, 125, 0, 0, surv, town)
       Some(patientScore,healthyScore)
     } else {
-      val patientScore = cvdFemaleRaw(age, b_AF, antipsychotics, corticoSteroids, migraine, b_ra, b_renal, severeMentalIllness, systemicLupusErythematosus, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpStd, smoke_cat, surv, town)
-      val healthyScore = cvdFemaleRaw(age, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 3.33, 125, 0, 0, surv, town)
+      val patientScore = cvdFemaleRaw(validAge, b_AF, antipsychotics, corticoSteroids, migraine, b_ra, b_renal, severeMentalIllness, systemicLupusErythematosus, b_treatedhyp, b_type1, b_type2, bmi, ethrisk, fh_cvd, rati, sbp, sbpStd, smoke_cat, surv, town)
+      val healthyScore = cvdFemaleRaw(validAge, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, ethrisk, 0, 3.33, 125, 0, 0, surv, town)
       Some(patientScore,healthyScore)
     }
   }
