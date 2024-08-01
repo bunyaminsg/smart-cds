@@ -84,7 +84,7 @@ object CdsPrefetchUtil {
    * @return Smoking Category in scale of 0 to 4 (0-Never Smoker, 1-Former Smoker, 2-Light Smoker, 3-Every day smoker, 4-Heavy Smoker)
    */
   def getSmokingCategory(prefetchKey: String, fhirPathEvaluator: FhirPathEvaluator): Option[Int] = {
-    fhirPathEvaluator.evaluateOptionalString(s"%cdsPrefetch.$prefetchKey.valueCodeableConcept.coding.code", JNothing) match {
+    fhirPathEvaluator.evaluateString(s"%cdsPrefetch.$prefetchKey.valueCodeableConcept.coding.code", JNothing).headOption match {
       case Some("LA18978-9"|"LA18980-5"|"266919005") => Some(SmokingCategoryEnum.NEVER)
       case Some("LA15920-4"|"8517006") => Some(SmokingCategoryEnum.FORMER)
       case Some("LA18977-1"|"LA18982-1") => Some(SmokingCategoryEnum.LIGHT)

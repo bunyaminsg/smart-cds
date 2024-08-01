@@ -128,6 +128,10 @@ object ACCAHAFlowExecution {
                                sbpOpt: Option[Double], smokingCategory: Option[Int], type1Diabetes: Int, type2Diabetes: Int,
                                hypertensiveTreatment: Int, ethnicity: String): Option[(Double, Double)] = {
 
+    /* This algorithm only works for ages between 40 and 79, so we squeeze patient's age between these two */
+    var adjustedAge = age
+    if (adjustedAge < 40) adjustedAge = 40
+    if (adjustedAge > 79) adjustedAge = 79
     if (cholesterolOpt.isEmpty || hdlOpt.isEmpty || sbpOpt.isEmpty || smokingCategory.isEmpty) {
       println("Missing required data for ACC/AHA Risk Score calculation.")
       return None
@@ -144,20 +148,20 @@ object ACCAHAFlowExecution {
     val smoking = smokingCategory.get
 
     if (gender == "male") {
-      val patientScore = calculateACCRiskM(age, totalCholesterol, hdlCholesterol, systolicBP,
+      val patientScore = calculateACCRiskM(adjustedAge, totalCholesterol, hdlCholesterol, systolicBP,
         smoking, diabetes, treatedHypertension, ethnicity)
 
       /* Calculate healthy score with ideal parameters for male patients of same age and race */
-      val healthyScore = calculateACCRiskM(age, 170, 50, 110, 0, 0, 0, ethnicity)
+      val healthyScore = calculateACCRiskM(adjustedAge, 170, 50, 110, 0, 0, 0, ethnicity)
       Some(patientScore, healthyScore)
     }
 
     else if (gender == "female") {
-      val patientScore = calculateACCRiskF(age, totalCholesterol, hdlCholesterol, systolicBP,
+      val patientScore = calculateACCRiskF(adjustedAge, totalCholesterol, hdlCholesterol, systolicBP,
         smoking, diabetes, treatedHypertension, ethnicity)
 
       /* Calculate healthy score with ideal parameters for female patients of same age and race */
-      val healthyScore = calculateACCRiskF(age, 170, 50, 110, 0, 0, 0, ethnicity)
+      val healthyScore = calculateACCRiskF(adjustedAge, 170, 50, 110, 0, 0, 0, ethnicity)
       Some(patientScore, healthyScore)
     }
 
