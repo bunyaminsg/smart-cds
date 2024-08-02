@@ -332,7 +332,7 @@ object AdvanceFlowExecution {
       val _hdl = hdl.get
       if((_cholesterol - _hdl)>3) {
         val targetCholesterol = _cholesterol - ((_cholesterol - _hdl) * 0.4)
-        if (t2d && ckd && !atorvastatin) {
+        if (t2d && !ckd && !atorvastatin) {
           if (cvd) {
             output.withCard(_.loadCardWithPostTranslation("card-reduce-non-hdl",
               "effectiveDate" -> DateTimeUtil.zonedNow(),
