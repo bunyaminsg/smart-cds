@@ -1,0 +1,9 @@
+version: '2.1'
+
+services:
+  smart-cds:
+    image: srdc/smart-cds
+    ports:
+      - 4801:8080
+    container_name: smart-cds
+    restart: always

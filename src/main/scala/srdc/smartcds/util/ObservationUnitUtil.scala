@@ -23,17 +23,6 @@ object ObservationUnitUtil {
   }
 
   /**
-   * Get unit preferred by the pilot site for the given concept
-   *
-   * @param pilotSite Pilot site abbreviation
-   * @param concept Unit concept of the observation
-   * @return
-   */
-  def getPreferredUnit(pilotSite: Option[String], concept: UnitConceptEnum): String = {
-    Try(SmartCdsConfig.preferredUnits.getObject(pilotSite.get.toLowerCase(Locale.ENGLISH)).toConfig.getString(concept)).getOrElse(getDefaultUnit(concept))
-  }
-
-  /**
    * Try matching given unit concept with a conversion method and
    * convert the quantity value to the target unit if possible
    *

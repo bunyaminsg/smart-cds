@@ -11,9 +11,6 @@ object SmartCdsConfig {
   /** Rule Units */
   lazy val ruleUnits: Config = config.getConfig("onfhir.cds.rule-units")
 
-  /** Preferred Units */
-  lazy val preferredUnits: Config = config.getConfig("onfhir.cds.preferred-units")
-
   /** Definitions Path */
   lazy val definitionsPath: Option[String] = Try(config.getString("onfhir.cds.definitions-path")).toOption
   lazy val conceptDefinitionsPath: Option[String] = Try(config.getString("app.concept-definitions-path")).toOption
